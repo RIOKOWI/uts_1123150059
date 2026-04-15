@@ -41,6 +41,7 @@ dependencies:
   dio: ^5.9.2
   equatable: ^2.0.8
   email_validator: ^3.0.0
+  flutter_svg: ^2.2.4
 
 dev_dependencies:
   flutter_test:
