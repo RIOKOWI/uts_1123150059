@@ -40,6 +40,7 @@ dependencies:
   google_sign_in: ^7.2.0
   dio: ^5.9.2
   equatable: ^2.0.8
+  email_validator: ^3.0.0
 
 dev_dependencies:
   flutter_test:
