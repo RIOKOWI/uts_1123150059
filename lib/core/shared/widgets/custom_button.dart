@@ -77,3 +77,7 @@ class CustomButton extends StatelessWidget {
     );
   }
 }
+
+// Contoh penggunaan:
+// CustomButton(label: 'Daftar', onPressed: _register, isLoading: isLoading)
+// CustomButton(label: 'Batal', variant: ButtonVariant.outlined, onPressed: () {})
