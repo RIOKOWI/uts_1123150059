@@ -1,4 +1,4 @@
-class ApiStrings {
+class AppStrings {
   // App
   static const String appName = 'Warmido';
 
