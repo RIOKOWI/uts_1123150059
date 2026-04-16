@@ -53,4 +53,30 @@ class AuthProvider extends ChangeNotifier {
     _status = AuthStatus.emailNotVerified;
     return true;
   }
+
+  Future<bool> loginAfterEmailVerification() async {
+    _setLoading();
+
+    // STEP 1: Reload status user dari server Firebase
+    await _firebaseUser?.reload();
+    _firebaseUser = _auth.currentUser;
+
+    if (!(_firebaseUser?.emailVerified ?? false)) {
+      // Belum klik link → kembali ke halaman verify
+      _status = AuthStatus.emailNotVerified;
+      return false;
+    }
+
+    // STEP 2: Re-login untuk dapat fresh session & token
+    final credential = await _auth.signInWithEmailAndPassword(
+      email: _tempEmail!,
+      password: _tempPassword!,
+    );
+    _firebaseUser = credential.user;
+    _tempEmail = null; // Hapus credentials dari memory
+    _tempPassword = null;
+
+    // STEP 3: Kirim Firebase token ke backend → dapat JWT
+    return await _verifyTokenToBackend();
+  }
 }
