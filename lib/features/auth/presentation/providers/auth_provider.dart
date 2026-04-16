@@ -185,4 +185,27 @@ class AuthProvider extends ChangeNotifier {
     _status = AuthStatus.unauthenticated;
     notifyListeners();
   }
+
+  // ─── Private Helpers ──────────────────────────────────────
+  void _setLoading() {
+    _status = AuthStatus.loading;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  void _setError(String message) {
+    _status = AuthStatus.error;
+    _errorMessage = message;
+    notifyListeners();
+  }
+
+  String _mapFirebaseError(String code) => switch (code) {
+    'email-already-in-use' => 'Email sudah terdaftar. Gunakan email lain.',
+    'user-not-found' => 'Akun tidak ditemukan. Silakan daftar.',
+    'wrong-password' => 'Password salah. Coba lagi.',
+    'invalid-email' => 'Format email tidak valid.',
+    'weak-password' => 'Password terlalu lemah. Minimal 6 karakter.',
+    'network-request-failed' => 'Tidak ada koneksi internet.',
+    _ => 'Terjadi kesalahan. Coba lagi.',
+  };
 }
