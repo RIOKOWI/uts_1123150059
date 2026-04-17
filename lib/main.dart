@@ -17,15 +17,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-      ],
-      child: const MyApp(),
-    ),
-  );
-
+  runApp(const MyApp());
 }
 
 
@@ -43,7 +35,7 @@ class MyApp extends StatelessWidget {
         title:                  AppStrings.appName,
         debugShowCheckedModeBanner: false,
         theme:                  AppTheme.light,
-        initialRoute:           AppRouter.splash,
+        initialRoute:           AppRouter.login,
         routes:                 AppRouter.routes,
       ),
     );
