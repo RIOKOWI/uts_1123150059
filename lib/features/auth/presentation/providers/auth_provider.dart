@@ -179,7 +179,7 @@ class AuthProvider extends ChangeNotifier {
   // ─── Logout ───────────────────────────────────────────────
   Future<void> logout() async {
     await _auth.signOut();
-    await _googleSignIn.signOut();
+    // await _googleSignIn.signOut();
     await SecureStorage.clearAll();
     _firebaseUser = null;
     _backendToken = null;
