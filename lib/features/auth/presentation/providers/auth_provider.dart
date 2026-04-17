@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:uts_1123150059/core/constants/app_constants.dart';
-import 'package:uts_1123150059/core/service/secure_storage.dart';
+import 'package:uts_1123150059/core/services/secure_storage.dart';
 import 'package:uts_1123150059/core/services/dio_client.dart';
 
 enum AuthStatus {

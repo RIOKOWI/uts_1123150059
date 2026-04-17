@@ -2,7 +2,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:uts_1123150059/core/constants/app_constants.dart';
-import 'package:uts_1123150059/core/service/secure_storage.dart';
+import 'package:uts_1123150059/core/services/secure_storage.dart';
 
 
 class DioClient {
