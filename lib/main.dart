@@ -7,6 +7,8 @@ import 'package:uts_1123150059/core/services/secure_storage.dart';
 import 'package:uts_1123150059/core/theme/app_theme.dart';
 import 'package:uts_1123150059/features/auth/presentation/providers/auth_provider.dart';
 import 'package:uts_1123150059/features/dashboard/presentation/providers/product_provider.dart';
+import 'package:uts_1123150059/features/cart/presentation/providers/cart_provider.dart';
+import 'package:uts_1123150059/features/cart/presentation/providers/checkout_provider.dart';
 import 'firebase_options.dart';
 
 
@@ -21,7 +23,9 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => ProductProvider()),  
+        ChangeNotifierProvider(create: (_) => ProductProvider()),
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => CheckoutProvider()),
       ],
       child: const MyApp(),
     ),
