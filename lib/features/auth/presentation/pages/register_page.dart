@@ -1,10 +1,12 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:uts_1123150059/core/routes/app_router.dart';
 import 'package:uts_1123150059/core/shared/widgets/auth_header.dart';
 import 'package:uts_1123150059/core/shared/widgets/custom_button.dart';
 import 'package:uts_1123150059/core/shared/widgets/custom_text_field.dart';
 import 'package:uts_1123150059/core/shared/widgets/loading_overlay.dart';
+import 'package:uts_1123150059/features/auth/presentation/providers/auth_provider.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -32,7 +34,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final auth = context.read<AuthPro>();
+    final auth = context.read<AuthProvider>();
     final success = await auth.register(
       name: _nameCtrl.text.trim(),
       email: _emailCtrl.text.trim(),

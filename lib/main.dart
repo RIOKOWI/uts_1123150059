@@ -1,12 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:uts_1123150059/core/constants/app_constants.dart';
 import 'package:uts_1123150059/core/constants/app_strings.dart';
 import 'package:uts_1123150059/core/routes/app_router.dart';
 import 'package:uts_1123150059/core/service/secure_storage.dart';
 import 'package:uts_1123150059/core/theme/app_theme.dart';
 import 'package:uts_1123150059/features/auth/presentation/providers/auth_provider.dart';
+import 'package:uts_1123150059/features/dashboard/presentation/providers/product_provider.dart';
 import 'firebase_options.dart';
 
 
@@ -50,8 +50,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
-import 'package:flutter/material.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});

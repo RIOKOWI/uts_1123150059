@@ -1,9 +1,11 @@
-import 'dart:nativewrappers/_internal/vm/lib/async_patch.dart';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:uts_1123150059/core/routes/app_router.dart';
 import 'package:uts_1123150059/core/shared/widgets/auth_header.dart';
 import 'package:uts_1123150059/core/shared/widgets/custom_button.dart';
+import 'package:uts_1123150059/features/auth/presentation/providers/auth_provider.dart';
 
 class VerifyEmailPage extends StatefulWidget {
   const VerifyEmailPage({super.key});

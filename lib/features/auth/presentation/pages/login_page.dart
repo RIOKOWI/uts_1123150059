@@ -1,5 +1,5 @@
+
 import 'package:email_validator/email_validator.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uts_1123150059/core/routes/app_router.dart';
@@ -10,6 +10,8 @@ import 'package:uts_1123150059/core/shared/widgets/divider_with_text.dart';
 import 'package:uts_1123150059/core/shared/widgets/google_sign_in_button.dart';
 import 'package:uts_1123150059/core/shared/widgets/loading_overlay.dart';
 import 'package:uts_1123150059/features/auth/presentation/providers/auth_provider.dart';
+
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -86,15 +88,15 @@ class _LoginPageState extends State<LoginPage> {
             onPressed: () => Navigator.pop(context),
             child: const Text('Batal'),
           ),
-          ElevatedButton(
-            onPressed: () async {
-              await FirebaseAuth.instance.sendPasswordResetEmail(
-                email: ctrl.text.trim(),
-              );
-              if (context.mounted) Navigator.pop(context);
-            },
-            child: const Text('Kirim'),
-          ),
+          // ElevatedButton(
+          //   onPressed: () async {
+          //     await Fire.instance.sendPasswordResetEmail(
+          //       email: ctrl.text.trim(),
+          //     );
+          //     if (context.mounted) Navigator.pop(context);
+          //   },
+          //   child: const Text('Kirim'),
+          // ),
         ],
       ),
     );

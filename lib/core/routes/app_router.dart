@@ -14,7 +14,7 @@ class AppRouter {
   static const String dashboard   = '/dashboard';
 
   static Map<String, WidgetBuilder> get routes => {
-    splash:      (_) => const SplashPage(),
+    // splash:      (_) => const SplashPage(),
     login:       (_) => const LoginPage(),
     register:    (_) => const RegisterPage(),
     verifyEmail: (_) => const VerifyEmailPage(),
