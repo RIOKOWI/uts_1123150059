@@ -1,6 +1,8 @@
 import 'dart:nativewrappers/_internal/vm/lib/async_patch.dart';
 
 import 'package:flutter/material.dart';
+import 'package:uts_1123150059/core/shared/widgets/auth_header.dart';
+import 'package:uts_1123150059/core/shared/widgets/custom_button.dart';
 
 class VerifyEmailPage extends StatefulWidget {
   const VerifyEmailPage({super.key});
@@ -64,6 +66,87 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   }
 
   Widget build(BuildContext context) {
-    return const Placeholder();
+    final user = context.watch<AuthProvider>().firebaseUser;
+
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Widget reusable: AuthHeader
+              const AuthHeader(
+                icon: Icons.mark_email_unread_outlined,
+                title: 'Verifikasi Email Kamu',
+                subtitle:
+                    'Kami sudah mengirim link verifikasi ke email di bawah ini.',
+                iconColor: Colors.orange,
+              ),
+              const SizedBox(height: 24),
+
+              // Tampilkan email user
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Text(
+                  user?.email ?? '-',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // Indikator polling
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Menunggu konfirmasi...',
+                    style: TextStyle(color: Colors.grey.shade600),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+
+              // Tombol kirim ulang dengan cooldown
+              CustomButton(
+                label: _resendCooldown
+                    ? 'Kirim Ulang ($_countdown detik)'
+                    : 'Kirim Ulang Email',
+                variant: ButtonVariant.outlined,
+                onPressed: _resendCooldown ? null : _resendEmail,
+              ),
+              const SizedBox(height: 16),
+
+              // Tombol logout
+              CustomButton(
+                label: 'Ganti Akun / Logout',
+                variant: ButtonVariant.text,
+                onPressed: () {
+                  context.read<AuthProvider>().logout();
+                  Navigator.pushReplacementNamed(context, AppRouter.login);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
