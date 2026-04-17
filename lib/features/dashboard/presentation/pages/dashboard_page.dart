@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:uts_1123150059/core/routes/app_router.dart';
 import 'package:uts_1123150059/features/auth/presentation/providers/auth_provider.dart';
 import 'package:uts_1123150059/features/dashboard/presentation/providers/product_provider.dart';
+import 'package:uts_1123150059/features/cart/presentation/providers/cart_provider.dart';
+import 'package:uts_1123150059/features/cart/presentation/pages/cart_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -42,6 +44,16 @@ class _DashboardPageState extends State<DashboardPage> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.shopping_cart),
+            tooltip: 'Keranjang',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CartPage()),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
@@ -160,6 +172,31 @@ class _DashboardPageState extends State<DashboardPage> {
                                 fontSize: 11,
                                 color: Color(0xFF1565C0),
                               ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          ElevatedButton(
+                            onPressed: () {
+                              context.read<CartProvider>().addItem(
+                                p.id.toString(),
+                                p.name,
+                                p.price,
+                                imageUrl: p.imageUrl,
+                              );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('${p.name} ditambahkan ke keranjang'),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              minimumSize: const Size(double.infinity, 36),
+                            ),
+                            child: const Text(
+                              'Tambah ke Keranjang',
+                              style: TextStyle(fontSize: 12),
                             ),
                           ),
                         ],
