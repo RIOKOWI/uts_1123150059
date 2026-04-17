@@ -16,7 +16,7 @@ class ProductModel extends Equatable {
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) => ProductModel(
-    id:       json['id']        as int,
+    id: (json['id'] as num?)?.toInt() ?? 0,
     name:     json['name']      as String,
     price:    (json['price'] as num).toDouble(),
     imageUrl: json['image_url'] as String,
@@ -24,6 +24,6 @@ class ProductModel extends Equatable {
   );
 
   @override
-  List<Object?> get props => [id, name, price];
+  List<Object?> get props => [id, name, price, imageUrl, category];
 
 }

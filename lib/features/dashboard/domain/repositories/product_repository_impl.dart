@@ -15,9 +15,11 @@ class ProductRepositoryImpl extends ProductRepository {
       queryParameters: {'page': page, 'limit': limit, 'category': category},
     );
 
+    print(response.data);
     final List<dynamic> data = response.data['data'];
     return data.map((e) => ProductModel.fromJson(e)).toList();
   }
+
 
   @override
   Future<ProductModel> getProductById(int id) async {

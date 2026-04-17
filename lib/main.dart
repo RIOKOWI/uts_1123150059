@@ -17,7 +17,15 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ProductProvider()),  
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 
@@ -26,18 +34,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => ProductProvider()),  
-      ],
-      child: MaterialApp(
-        title:                  AppStrings.appName,
-        debugShowCheckedModeBanner: false,
-        theme:                  AppTheme.light,
-        initialRoute:           AppRouter.login,
-        routes:                 AppRouter.routes,
-      ),
+    return MaterialApp(
+      title:                  AppStrings.appName,
+      debugShowCheckedModeBanner: false,
+      theme:                  AppTheme.light,
+      initialRoute:           AppRouter.login,
+      routes:                 AppRouter.routes,
     );
   }
 }
