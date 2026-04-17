@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:uts_1123150059/core/constants/app_constants.dart';
 import 'package:uts_1123150059/core/constants/app_strings.dart';
 import 'package:uts_1123150059/core/routes/app_router.dart';
+import 'package:uts_1123150059/core/service/secure_storage.dart';
 import 'package:uts_1123150059/core/theme/app_theme.dart';
 import 'package:uts_1123150059/features/auth/presentation/providers/auth_provider.dart';
 import 'firebase_options.dart';
@@ -61,18 +62,22 @@ class SplashPage extends StatefulWidget {
 
 class _SplashPageState extends State<SplashPage> {
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Dashboard"),
-        actions: const [],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-            children: [],
-        ),
-      ),
-    );
+  void initState() {
+    super.initState();
+    _checkAuth();
   }
+
+  Future<void> _checkAuth() async {
+    await Future.delayed(const Duration(seconds: 2)); // Animasi splash
+    if (!mounted) return;
+
+    final token = await SecureStorage.getToken();
+    final route = token != null ? AppRouter.dashboard : AppRouter.login;
+    Navigator.pushReplacementNamed(context, route);
+  }
+
+  @override
+  Widget build(BuildContext context) => const Scaffold(
+    body: Center(child: CircularProgressIndicator()),
+  );
 }
