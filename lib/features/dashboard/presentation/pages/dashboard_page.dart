@@ -45,16 +45,6 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.shopping_cart),
-            tooltip: 'Keranjang',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CartPage()),
-              );
-            },
-          ),
-          IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await auth.logout();
@@ -63,6 +53,16 @@ class _DashboardPageState extends State<DashboardPage> {
             },
           ),
         ],
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const CartPage()),
+          );
+        },
+        child: const Icon(Icons.shopping_cart),
       ),
 
       body: switch (product.status) {
@@ -185,7 +185,9 @@ class _DashboardPageState extends State<DashboardPage> {
                               );
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('${p.name} ditambahkan ke keranjang'),
+                                  content: Text(
+                                    '${p.name} ditambahkan ke keranjang',
+                                  ),
                                   duration: const Duration(seconds: 2),
                                 ),
                               );

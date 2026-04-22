@@ -47,5 +47,6 @@ app.*.map.json
 .vscode/templates
 
 .gitignore
-
 SKILLS.md
+presentation.md
+PRESENTATION_SCRIPT.md
