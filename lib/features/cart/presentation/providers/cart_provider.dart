@@ -12,12 +12,12 @@ class CartProvider extends ChangeNotifier {
     return _items.fold(0, (sum, item) => sum + item.totalPrice);
   }
 
-  /// Tambah barang ke cart
+  
   void addItem(String productId, String productName, double price, {String? imageUrl}) {
     final index = _items.indexWhere((item) => item.productId == productId);
     
     if (index == -1) {
-      // Item tidak ada, tambah baru
+      
       final newItem = CartItem(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         productId: productId,
@@ -28,7 +28,7 @@ class CartProvider extends ChangeNotifier {
       );
       _items.add(newItem);
     } else {
-      // Item sudah ada, update quantity
+      
       final item = _items[index];
       final updatedItem = item.copyWith(quantity: item.quantity + 1);
       _items[index] = updatedItem;
@@ -37,13 +37,13 @@ class CartProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Hapus barang dari cart
+  
   void removeItem(String productId) {
     _items.removeWhere((item) => item.productId == productId);
     notifyListeners();
   }
 
-  /// Update quantity barang
+  
   void updateItemQuantity(String productId, int quantity) {
     final index = _items.indexWhere((item) => item.productId == productId);
     if (index != -1) {
@@ -56,7 +56,7 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
-  /// Clear semua item
+  
   void clearCart() {
     _items.clear();
     notifyListeners();

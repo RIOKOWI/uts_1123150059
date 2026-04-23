@@ -31,7 +31,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         MaterialPageRoute(
           builder: (context) => PaymentSuccessPage(
             onSuccess: () {
-              // Clear cart setelah sukses
+              
               context.read<CartProvider>().clearCart();
               Navigator.popUntil(context, (route) => route.isFirst);
             },
@@ -76,7 +76,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
               children: [
                 Column(
                   children: [
-                    // Header Checkout Info
+                    
                     Container(
                       padding: const EdgeInsets.all(16),
                       color: Colors.blue[50],
@@ -101,7 +101,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         ],
                       ),
                     ),
-                    // Item List
+                    
                     Expanded(
                       child: ListView.builder(
                         itemCount: cartProvider.items.length,
@@ -158,7 +158,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         },
                       ),
                     ),
-                    // Total & Checkout Button
+                    
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(

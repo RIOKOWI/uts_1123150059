@@ -44,7 +44,7 @@ class CartPage extends StatelessWidget {
                         padding: const EdgeInsets.all(12),
                         child: Row(
                           children: [
-                            // Product Image Placeholder
+                            
                             Container(
                               width: 80,
                               height: 80,
@@ -57,7 +57,7 @@ class CartPage extends StatelessWidget {
                                   : const Icon(Icons.image, color: Colors.grey),
                             ),
                             const SizedBox(width: 12),
-                            // Product Details
+
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,7 +119,7 @@ class CartPage extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            // Delete Button
+                            
                             Column(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -149,7 +149,7 @@ class CartPage extends StatelessWidget {
                   },
                 ),
               ),
-              // Bottom Summary
+
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
