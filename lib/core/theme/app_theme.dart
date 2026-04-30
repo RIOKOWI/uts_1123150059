@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:uts_1123150059/core/constants/app_colors.dart';
 
 class AppTheme {
+
+  // Light
   static ThemeData get light {
     return ThemeData(
       useMaterial3: true,
@@ -49,6 +51,26 @@ class AppTheme {
           vertical: 14,
         ),
       ),
+    );
+  }
+
+  // ── DARK ─────────────────────────────────────────────────
+  static ThemeData get dark {
+    return ThemeData(
+      brightness: Brightness.dark, // ← gelap
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.primary,
+        brightness: Brightness.dark,
+        primary: AppColors.accent, // ← biru MUDA (lebih kontras di gelap)
+        surface: AppColors.darkSurface, // ← abu gelap
+      ),
+      scaffoldBackgroundColor: AppColors.darkBackground, // ← hitam gelap
+      appBarTheme: AppBarTheme(
+        backgroundColor:
+            AppColors.darkSurface, // ← abu gelap (bukan hitam polos)
+        foregroundColor: AppColors.darkTextPrimary, // ← putih keabu
+      ),
+      // ...
     );
   }
 }

@@ -6,6 +6,7 @@ class AppColors {
   static const Color primaryDark = Color(0xFF0D47A1);
   static const Color accent = Color(0xFF42A5F5);
 
+  // Light Mode
   static const Color background = Color(0xFFF5F5F5);
   static const Color surface = Colors.white;
   static const Color error = Colors.red;
