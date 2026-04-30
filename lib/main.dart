@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uts_1123150059/core/constants/app_strings.dart';
+import 'package:uts_1123150059/core/providers/theme_provider.dart';
 import 'package:uts_1123150059/core/routes/app_router.dart';
 import 'package:uts_1123150059/core/services/secure_storage.dart';
 import 'package:uts_1123150059/core/theme/app_theme.dart';
@@ -11,13 +12,10 @@ import 'package:uts_1123150059/features/cart/presentation/providers/cart_provide
 import 'package:uts_1123150059/features/cart/presentation/providers/checkout_provider.dart';
 import 'firebase_options.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(
     MultiProvider(
@@ -32,22 +30,24 @@ void main() async {
   );
 }
 
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+
     return MaterialApp(
-      title:                  AppStrings.appName,
+      title: AppStrings.appName,
       debugShowCheckedModeBanner: false,
-      theme:                  AppTheme.light,
-      initialRoute:           AppRouter.login,
-      routes:                 AppRouter.routes,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: themeProvider.themeMode,
+      initialRoute: AppRouter.login,
+      routes: AppRouter.routes,
     );
   }
 }
-
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -73,7 +73,6 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   @override
-  Widget build(BuildContext context) => const Scaffold(
-    body: Center(child: CircularProgressIndicator()),
-  );
+  Widget build(BuildContext context) =>
+      const Scaffold(body: Center(child: CircularProgressIndicator()));
 }
