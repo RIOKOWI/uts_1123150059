@@ -17,4 +17,19 @@ class AppColors {
   static const Color divider = Color(0xFFE0E0E0);
   static const Color border = Color(0xFFE0E0E0);
 
+  // ── Dark Mode ────────────────────────────────────────────────
+  static const Color darkBackground  = Color(0xFF121212); // latar halaman
+  static const Color darkSurface     = Color(0xFF1E1E1E); // AppBar, bottom nav
+  static const Color darkSurfaceCard = Color(0xFF2C2C2C); // kartu, input field
+
+
+  static const Color darkTextPrimary   = Color(0xFFEEEEEE);
+  static const Color darkTextSecondary = Color(0xFFAAAAAA);
+  static const Color darkTextHint      = Color(0xFF666666);
+
+
+  static const Color darkDivider = Color(0xFF3A3A3A);
+  static const Color darkBorder  = Color(0xFF3A3A3A);
+
+
 }
