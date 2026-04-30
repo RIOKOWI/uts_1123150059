@@ -95,10 +95,24 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.accent, width: 2),
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
+      ),
+      switchTheme: SwitchThemeData(
+        // Warna bulatan switch
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.primary; // saat ON → biru
+          }
+          return Colors.grey.shade400; // saat OFF → abu
+        }),
+        // Warna rel switch
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.primary.withValues(
+              alpha: 0.4,
+            ); // ON → biru transparan
+          }
+          return Colors.grey.shade300; // OFF → abu
+        }),
       ),
     );
   }
