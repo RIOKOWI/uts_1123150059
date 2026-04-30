@@ -114,6 +114,13 @@ class AppTheme {
           return Colors.grey.shade300; // OFF → abu
         }),
       ),
+      textTheme: const TextTheme(
+        bodyLarge: TextStyle(color: AppColors.darkTextPrimary),
+        bodyMedium: TextStyle(color: AppColors.darkTextPrimary),
+        bodySmall: TextStyle(color: AppColors.darkTextSecondary),
+        titleLarge: TextStyle(color: AppColors.darkTextPrimary),
+        titleMedium: TextStyle(color: AppColors.darkTextPrimary),
+      ),
     );
   }
 }
