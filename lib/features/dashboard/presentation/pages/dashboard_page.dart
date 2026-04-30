@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:uts_1123150059/core/providers/theme_provider.dart';
 import 'package:uts_1123150059/core/routes/app_router.dart';
 import 'package:uts_1123150059/features/auth/presentation/providers/auth_provider.dart';
 import 'package:uts_1123150059/features/dashboard/presentation/providers/product_provider.dart';
@@ -27,6 +28,8 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final product = context.watch<ProductProvider>();
+    final themeProvider = context.watch<ThemeProvider>(); // ← baca + dengarkan
+    final isDark = themeProvider.isDark;
 
     return Scaffold(
       appBar: AppBar(
@@ -44,6 +47,35 @@ class _DashboardPageState extends State<DashboardPage> {
           ],
         ),
         actions: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    isDark
+                        ? Icons.dark_mode
+                        : Icons.light_mode, // ← ikon berubah
+                    size: 20,
+                    color: isDark
+                        ? Colors.amber
+                        : Colors.grey.shade600, // ← warna berubah
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    isDark ? 'Mode Gelap' : 'Mode Terang', // ← label berubah
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+              Switch(
+                value: isDark, // ← posisi switch
+                onChanged: (_) =>
+                    context.read<ThemeProvider>().toggle(), // ← panggil toggle
+              ),
+            ],
+          ),
+
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
