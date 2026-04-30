@@ -44,12 +44,13 @@ class _DashboardPageState extends State<DashboardPage> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Dashboard', style: TextStyle(fontSize: 18)),
+            Text('Dashboard', style: TextStyle(fontSize: 18, color: onSurface),),
             Text(
               'Halo, ${auth.firebaseUser?.displayName ?? 'User'}!',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.normal,
+                color: onSurface,
               ),
             ),
           ],
@@ -72,7 +73,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   const SizedBox(width: 10),
                   Text(
                     isDark ? 'Mode Gelap' : 'Mode Terang', // ← label berubah
-                    style: const TextStyle(fontSize: 14),
+                    style: TextStyle(fontSize: 14, color: onSurface),
                   ),
                 ],
               ),
@@ -85,7 +86,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
 
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: Icon(Icons.logout, color: onSurface,),
             onPressed: () async {
               await auth.logout();
               if (!mounted) return;
@@ -185,7 +186,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
-                              color: surface
+                              color: onSurface
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -205,14 +206,14 @@ class _DashboardPageState extends State<DashboardPage> {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
+                              color: hintColor,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
                               p.category,
                               style: TextStyle(
                                 fontSize: 11,
-                                color: surface,
+                                color: onSurface,
                               ),
                             ),
                           ),
