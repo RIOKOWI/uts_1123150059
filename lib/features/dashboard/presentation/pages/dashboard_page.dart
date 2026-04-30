@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:uts_1123150059/core/constants/app_colors.dart';
 import 'package:uts_1123150059/core/providers/theme_provider.dart';
 import 'package:uts_1123150059/core/routes/app_router.dart';
 import 'package:uts_1123150059/features/auth/presentation/providers/auth_provider.dart';
@@ -31,8 +32,15 @@ class _DashboardPageState extends State<DashboardPage> {
     final themeProvider = context.watch<ThemeProvider>(); // ← baca + dengarkan
     final isDark = themeProvider.isDark;
 
+    // warna
+    final surface = Theme.of(context).colorScheme.surface;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final primary = Theme.of(context).colorScheme.primary;
+    final hintColor = Theme.of(context).hintColor;
+
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: surface,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -140,6 +148,7 @@ class _DashboardPageState extends State<DashboardPage> {
             itemBuilder: (context, i) {
               final p = product.products[i];
               return Card(
+                color: surface,
                 elevation: 2,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -173,9 +182,10 @@ class _DashboardPageState extends State<DashboardPage> {
                         children: [
                           Text(
                             p.name,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
+                              color: surface
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -183,8 +193,8 @@ class _DashboardPageState extends State<DashboardPage> {
                           const SizedBox(height: 4),
                           Text(
                             'Rp ${p.price.toStringAsFixed(0)}',
-                            style: const TextStyle(
-                              color: Color(0xFF1565C0),
+                            style: TextStyle(
+                              color: primary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -200,9 +210,9 @@ class _DashboardPageState extends State<DashboardPage> {
                             ),
                             child: Text(
                               p.category,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
-                                color: Color(0xFF1565C0),
+                                color: surface,
                               ),
                             ),
                           ),
