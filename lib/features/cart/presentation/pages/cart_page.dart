@@ -3,8 +3,21 @@ import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 import 'checkout_page.dart';
 
-class CartPage extends StatelessWidget {
+class CartPage extends StatefulWidget {
   const CartPage({Key? key}) : super(key: key);
+
+  @override
+  State<CartPage> createState() => _CartPageState();
+}
+
+class _CartPageState extends State<CartPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CartProvider>().loadCart();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,6 +28,32 @@ class CartPage extends StatelessWidget {
       ),
       body: Consumer<CartProvider>(
         builder: (context, cartProvider, _) {
+          if (cartProvider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (cartProvider.errorMessage != null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 80, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    cartProvider.errorMessage ?? 'Terjadi kesalahan',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 14, color: Colors.red),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => cartProvider.loadCart(),
+                    child: const Text('Coba Lagi'),
+                  ),
+                ],
+              ),
+            );
+          }
+
           if (cartProvider.items.isEmpty) {
             return Center(
               child: Column(
@@ -44,7 +83,7 @@ class CartPage extends StatelessWidget {
                         padding: const EdgeInsets.all(12),
                         child: Row(
                           children: [
-                            
+                            // Product image
                             Container(
                               width: 80,
                               height: 80,
@@ -52,8 +91,14 @@ class CartPage extends StatelessWidget {
                                 color: Colors.grey[300],
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: item.imageUrl != null
-                                  ? Image.network(item.imageUrl!, fit: BoxFit.cover)
+                              child: item.product.imageUrl.isNotEmpty
+                                  ? Image.network(
+                                      item.product.imageUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return const Icon(Icons.image, color: Colors.grey);
+                                      },
+                                    )
                                   : const Icon(Icons.image, color: Colors.grey),
                             ),
                             const SizedBox(width: 12),
@@ -63,15 +108,17 @@ class CartPage extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    item.productName,
+                                    item.product.name,
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                     ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'Rp ${item.price.toStringAsFixed(0)}',
+                                    'Rp ${item.product.price.toStringAsFixed(0)}',
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: Colors.grey[600],
@@ -84,7 +131,7 @@ class CartPage extends StatelessWidget {
                                         onPressed: () {
                                           if (item.quantity > 1) {
                                             cartProvider.updateItemQuantity(
-                                              item.productId,
+                                              item.id,
                                               item.quantity - 1,
                                             );
                                           }
@@ -105,7 +152,7 @@ class CartPage extends StatelessWidget {
                                       IconButton(
                                         onPressed: () {
                                           cartProvider.updateItemQuantity(
-                                            item.productId,
+                                            item.id,
                                             item.quantity + 1,
                                           );
                                         },
@@ -119,7 +166,8 @@ class CartPage extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            
+
+                            // Total price and delete button
                             Column(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -133,7 +181,7 @@ class CartPage extends StatelessWidget {
                                 const SizedBox(height: 8),
                                 IconButton(
                                   onPressed: () {
-                                    cartProvider.removeItem(item.productId);
+                                    cartProvider.removeItem(item.id);
                                   },
                                   icon: const Icon(Icons.delete, color: Colors.red),
                                   iconSize: 20,
