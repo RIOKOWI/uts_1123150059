@@ -21,6 +21,12 @@ class _CartPageState extends State<CartPage> {
 
   @override
   Widget build(BuildContext context) {
+    // warna
+    final surface = Theme.of(context).colorScheme.surface;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final primary = Theme.of(context).colorScheme.primary;
+    final hintColor = Theme.of(context).hintColor;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Keranjang'),
@@ -201,8 +207,8 @@ class _CartPageState extends State<CartPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  border: Border(top: BorderSide(color: Colors.grey[300]!)),
+                  color: surface,
+                  border: Border(top: BorderSide(color: hintColor)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
