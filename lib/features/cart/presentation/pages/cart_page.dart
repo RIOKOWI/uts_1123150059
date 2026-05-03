@@ -127,7 +127,7 @@ class _CartPageState extends State<CartPage> {
                                     'Rp ${item.product.price.toStringAsFixed(0)}',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: Colors.grey[600],
+                                      color: onSurface,
                                     ),
                                   ),
                                   const SizedBox(height: 8),

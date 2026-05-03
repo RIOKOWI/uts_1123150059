@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:uts_1123150059/core/constants/app_colors.dart';
 import 'package:uts_1123150059/core/providers/theme_provider.dart';
 import 'package:uts_1123150059/core/routes/app_router.dart';
 import 'package:uts_1123150059/features/auth/presentation/providers/auth_provider.dart';
@@ -36,7 +35,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final surface = Theme.of(context).colorScheme.surface;
     final onSurface = Theme.of(context).colorScheme.onSurface;
     final primary = Theme.of(context).colorScheme.primary;
-    final hintColor = Theme.of(context).hintColor;
+    
 
     return Scaffold(
       appBar: AppBar(
@@ -44,7 +43,7 @@ class _DashboardPageState extends State<DashboardPage> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Dashboard', style: TextStyle(fontSize: 18, color: onSurface),),
+            Text('Dashboard', style: TextStyle(fontSize: 18, color: onSurface)),
             Text(
               'Halo, ${auth.firebaseUser?.displayName ?? 'User'}!',
               style: TextStyle(
@@ -86,7 +85,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
 
           IconButton(
-            icon: Icon(Icons.logout, color: onSurface,),
+            icon: Icon(Icons.logout, color: onSurface),
             onPressed: () async {
               await auth.logout();
               if (!mounted) return;
@@ -186,7 +185,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
-                              color: onSurface
+                              color: onSurface,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -206,15 +205,12 @@ class _DashboardPageState extends State<DashboardPage> {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: hintColor,
+                              color: onSurface,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
                               p.category,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: onSurface,
-                              ),
+                              style: TextStyle(fontSize: 11, color: surface),
                             ),
                           ),
                           const SizedBox(height: 6),
