@@ -120,8 +120,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                       color: Colors.grey[300],
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: item.imageUrl != null
-                                        ? Image.network(item.imageUrl!, fit: BoxFit.cover)
+                                    child: item.product.imageUrl.isNotEmpty
+                                        ? Image.network(item.product.imageUrl, fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) {
+                                              return const Icon(Icons.image, color: Colors.grey);
+                                            },)
                                         : const Icon(Icons.image, color: Colors.grey),
                                   ),
                                   const SizedBox(width: 12),
@@ -130,15 +133,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          item.productName,
+                                          item.product.name,
                                           style: const TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.bold,
                                           ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          'Qty: ${item.quantity} x Rp ${item.price.toStringAsFixed(0)}',
+                                          'Qty: ${item.quantity} x Rp ${item.product.price.toStringAsFixed(0)}',
                                           style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                                         ),
                                       ],
