@@ -219,13 +219,12 @@ class _DashboardPageState extends State<DashboardPage> {
                           ),
                           const SizedBox(height: 6),
                           ElevatedButton(
-                            onPressed: () {
-                              context.read<CartProvider>().addItem(
-                                p.id.toString(),
-                                p.name,
-                                p.price,
-                                imageUrl: p.imageUrl,
+                            onPressed: () async {
+                              await context.read<CartProvider>().addItem(
+                                p.id,
+                                1,
                               );
+                              if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
