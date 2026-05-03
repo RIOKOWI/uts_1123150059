@@ -71,15 +71,19 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().firebaseUser;
 
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final primary = Theme.of(context).colorScheme.primary;
+    final hintColor = Theme.of(context).hintColor;
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Widget reusable: AuthHeader
-              const AuthHeader(
+              AuthHeader(
                 icon: Icons.mark_email_unread_outlined,
                 title: 'Verifikasi Email Kamu',
                 subtitle:
@@ -95,15 +99,16 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: primary,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: hintColor),
                 ),
                 child: Text(
                   user?.email ?? '-',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
+                    color: onSurface
                   ),
                 ),
               ),
@@ -121,7 +126,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                   const SizedBox(width: 12),
                   Text(
                     'Menunggu konfirmasi...',
-                    style: TextStyle(color: Colors.grey.shade600),
+                    style: TextStyle(color: onSurface),
                   ),
                 ],
               ),
