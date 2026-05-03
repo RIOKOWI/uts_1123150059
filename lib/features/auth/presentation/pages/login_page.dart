@@ -2,6 +2,7 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:uts_1123150059/core/constants/app_strings.dart';
 import 'package:uts_1123150059/core/routes/app_router.dart';
 import 'package:uts_1123150059/core/shared/widgets/auth_header.dart';
 import 'package:uts_1123150059/core/shared/widgets/custom_button.dart';
@@ -111,13 +112,13 @@ class _LoginPageState extends State<LoginPage> {
       child: Scaffold(
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(24),
             child: Form(
               key: _formKey,
               child: Column(
                 children: [
                   const SizedBox(height: 32),
-                  const AuthHeader(
+                  AuthHeader(
                     icon: Icons.lock_open_outlined,
                     title: 'Selamat Datang',
                     subtitle: 'Masuk ke akun Anda untuk melanjutkan',
@@ -125,10 +126,12 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 32),
                   CustomTextField(
                     label: 'Email',
-                    hint: 'contoh@email.com',
+                    hint: AppStrings.emailHint,
                     controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
-                    prefixIcon: const Icon(Icons.email_outlined),
+                    prefixIcon: Icon(
+                      Icons.email_outlined
+                    ),
                     validator: (v) {
                       if (v?.isEmpty ?? true) return 'Email wajib diisi';
                       if (!EmailValidator.validate(v!)) {
@@ -136,8 +139,9 @@ class _LoginPageState extends State<LoginPage> {
                       }
                       return null;
                     },
+                    
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   CustomTextField(
                     label: 'Password',
                     hint: 'Masukkan password',
@@ -168,7 +172,7 @@ class _LoginPageState extends State<LoginPage> {
                     isLoading: isLoading,
                   ),
                   const SizedBox(height: 20),
-                  const DividerWithText(text: 'atau masuk dengan'),
+                  DividerWithText(text: 'atau masuk dengan'),
                   const SizedBox(height: 20),
                   GoogleSignInButton(
                     onPressed: _loginGoogle,
