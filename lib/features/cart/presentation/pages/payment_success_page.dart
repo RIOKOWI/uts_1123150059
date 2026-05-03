@@ -7,6 +7,11 @@ class PaymentSuccessPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surface = Theme.of(context).colorScheme.surface;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final primary = Theme.of(context).colorScheme.primary;
+
+
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
@@ -44,7 +49,7 @@ class PaymentSuccessPage extends StatelessWidget {
                 'Terima kasih telah berbelanja',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey[600],
+                  color: onSurface,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -54,7 +59,7 @@ class PaymentSuccessPage extends StatelessWidget {
                 margin: const EdgeInsets.symmetric(horizontal: 32),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.blue[50],
+                  color: surface,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
@@ -62,10 +67,10 @@ class PaymentSuccessPage extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Nomor Pesanan:'),
+                        Text('Nomor Pesanan:', style: TextStyle(color: onSurface),),
                         Text(
                           '#${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(fontWeight: FontWeight.bold, color: onSurface),
                         ),
                       ],
                     ),
@@ -73,10 +78,10 @@ class PaymentSuccessPage extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Tanggal:'),
+                        Text('Tanggal:', style: TextStyle(color: onSurface),),
                         Text(
                           '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(fontWeight: FontWeight.bold, color: onSurface),
                         ),
                       ],
                     ),
