@@ -243,6 +243,44 @@ class _CartPageState extends State<CartPage> {
                         style: TextStyle(fontSize: 16, color: Colors.white),
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Kosongkan Keranjang'),
+                            content: const Text(
+                              'Apakah Anda yakin ingin menghapus semua item dari keranjang?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Batal'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  cartProvider.clearCart();
+                                  Navigator.pop(context);
+                                },
+                                child: const Text(
+                                  'Hapus Semua',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        side: const BorderSide(color: Colors.red),
+                      ),
+                      child: const Text(
+                        'Kosongkan Keranjang',
+                        style: TextStyle(color: Colors.red, fontSize: 16),
+                      ),
+                    ),
                   ],
                 ),
               ),
