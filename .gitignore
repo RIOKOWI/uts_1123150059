@@ -50,3 +50,4 @@ app.*.map.json
 SKILLS.md
 presentation.md
 PRESENTATION_SCRIPT.md
+docs/*

@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:uts_1123150059/core/constants/app_constants.dart';
+import 'package:uts_1123150059/core/constants/api_constants.dart';
 import 'package:uts_1123150059/core/services/dio_client.dart';
 import 'package:uts_1123150059/features/dashboard/data/models/product_model.dart';
 
@@ -21,7 +21,7 @@ class ProductProvider extends ChangeNotifier{
     notifyListeners();
 
     try {
-      final response = await DioClient.instance.get(AppConstants.products);
+      final response = await DioClient.instance.get(ApiConstants.products);
 
       // Backend response: { "data": [ {...}, {...} ] }
       final List<dynamic> data = response.data['data'];
