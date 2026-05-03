@@ -1,23 +1,63 @@
+import 'package:uts_1123150059/core/constants/api_constants.dart';
+import 'package:uts_1123150059/core/services/dio_client.dart';
 import 'package:uts_1123150059/features/cart/data/models/cart_item_model.dart';
 import 'cart_repository.dart';
 
 class CartRepositoryImpl implements CartRepository {
-  final List<CartItem> _localCart = [];
-
   @override
-  Future<void> saveCart(List<CartItem> items) async {
-    // Simulasi menyimpan ke database
-    _localCart.clear();
-    _localCart.addAll(items);
+  Future<List<CartItemModel>> getCart() async {
+    final response = await DioClient.instance.get(
+      ApiConstants.cart,
+    );
+
+    final List<dynamic> items = response.data['data']['items'] ?? [];
+    return items
+        .map((item) => CartItemModel.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 
   @override
-  Future<List<CartItem>> loadCart() async {
-    return _localCart;
+  Future<CartItemModel> addToCart(
+    int productId,
+    int quantity,
+  ) async {
+    final response = await DioClient.instance.post(
+      ApiConstants.cart,
+      data: {
+        'product_id': productId,
+        'quantity': quantity,
+      },
+    );
+
+    return CartItemModel.fromJson(response.data['data']);
+  }
+
+  @override
+  Future<CartItemModel> updateCartItem(
+    int cartItemId,
+    int quantity,
+  ) async {
+    final response = await DioClient.instance.put(
+      '${ApiConstants.cart}/$cartItemId',
+      data: {
+        'quantity': quantity,
+      },
+    );
+
+    return CartItemModel.fromJson(response.data['data']);
+  }
+
+  @override
+  Future<void> deleteCartItem(int cartItemId) async {
+    await DioClient.instance.delete(
+      '${ApiConstants.cart}/$cartItemId',
+    );
   }
 
   @override
   Future<void> clearCart() async {
-    _localCart.clear();
+    await DioClient.instance.delete(
+      ApiConstants.cart,
+    );
   }
 }

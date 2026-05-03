@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:uts_1123150059/core/providers/theme_provider.dart';
 import 'package:uts_1123150059/core/routes/app_router.dart';
 import 'package:uts_1123150059/features/auth/presentation/providers/auth_provider.dart';
 import 'package:uts_1123150059/features/dashboard/presentation/providers/product_provider.dart';
@@ -27,25 +28,64 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final product = context.watch<ProductProvider>();
+    final themeProvider = context.watch<ThemeProvider>(); // ← baca + dengarkan
+    final isDark = themeProvider.isDark;
+
+    // warna
+    final surface = Theme.of(context).colorScheme.surface;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final primary = Theme.of(context).colorScheme.primary;
+    
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: surface,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Dashboard', style: TextStyle(fontSize: 18)),
+            Text('Dashboard', style: TextStyle(fontSize: 18, color: onSurface)),
             Text(
               'Halo, ${auth.firebaseUser?.displayName ?? 'User'}!',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.normal,
+                color: onSurface,
               ),
             ),
           ],
         ),
         actions: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    isDark
+                        ? Icons.dark_mode
+                        : Icons.light_mode, // ← ikon berubah
+                    size: 20,
+                    color: isDark
+                        ? Colors.amber
+                        : Colors.grey.shade600, // ← warna berubah
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    isDark ? 'Mode Gelap' : 'Mode Terang', // ← label berubah
+                    style: TextStyle(fontSize: 14, color: onSurface),
+                  ),
+                ],
+              ),
+              Switch(
+                value: isDark, // ← posisi switch
+                onChanged: (_) =>
+                    context.read<ThemeProvider>().toggle(), // ← panggil toggle
+              ),
+            ],
+          ),
+
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: Icon(Icons.logout, color: onSurface),
             onPressed: () async {
               await auth.logout();
               if (!mounted) return;
@@ -108,6 +148,7 @@ class _DashboardPageState extends State<DashboardPage> {
             itemBuilder: (context, i) {
               final p = product.products[i];
               return Card(
+                color: surface,
                 elevation: 2,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -141,9 +182,10 @@ class _DashboardPageState extends State<DashboardPage> {
                         children: [
                           Text(
                             p.name,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
+                              color: onSurface,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -151,8 +193,8 @@ class _DashboardPageState extends State<DashboardPage> {
                           const SizedBox(height: 4),
                           Text(
                             'Rp ${p.price.toStringAsFixed(0)}',
-                            style: const TextStyle(
-                              color: Color(0xFF1565C0),
+                            style: TextStyle(
+                              color: primary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -163,26 +205,22 @@ class _DashboardPageState extends State<DashboardPage> {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
+                              color: onSurface,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
                               p.category,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: Color(0xFF1565C0),
-                              ),
+                              style: TextStyle(fontSize: 11, color: surface),
                             ),
                           ),
                           const SizedBox(height: 6),
                           ElevatedButton(
-                            onPressed: () {
-                              context.read<CartProvider>().addItem(
-                                p.id.toString(),
-                                p.name,
-                                p.price,
-                                imageUrl: p.imageUrl,
+                            onPressed: () async {
+                              await context.read<CartProvider>().addItem(
+                                p.id,
+                                1,
                               );
+                              if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(

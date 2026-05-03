@@ -1,37 +1,74 @@
-class CartItem {
-  final String id;
-  final String productId;
-  final String productName;
-  final double price;
-  int quantity;
-  final String? imageUrl;
+import 'package:equatable/equatable.dart';
 
-  CartItem({
+class CartItemModel extends Equatable {
+  final int id;
+  final int userId;
+  final int productId;
+  final int quantity;
+  final ProductModel product;
+
+  const CartItemModel({
     required this.id,
+    required this.userId,
     required this.productId,
-    required this.productName,
-    required this.price,
     required this.quantity,
-    this.imageUrl,
+    required this.product,
   });
 
-  double get totalPrice => price * quantity;
+  double get totalPrice => product.price * quantity;
 
-  CartItem copyWith({
-    String? id,
-    String? productId,
-    String? productName,
-    double? price,
-    int? quantity,
-    String? imageUrl,
-  }) {
-    return CartItem(
-      id: id ?? this.id,
-      productId: productId ?? this.productId,
-      productName: productName ?? this.productName,
-      price: price ?? this.price,
-      quantity: quantity ?? this.quantity,
-      imageUrl: imageUrl ?? this.imageUrl,
-    );
-  }
+  factory CartItemModel.fromJson(Map<String, dynamic> json) => CartItemModel(
+    id: (json['ID'] as num?)?.toInt() ?? 0,
+    userId: (json['user_id'] as num?)?.toInt() ?? 0,
+    productId: (json['product_id'] as num?)?.toInt() ?? 0,
+    quantity: (json['quantity'] as num?)?.toInt() ?? 0,
+    product: ProductModel.fromJson(json['product'] ?? {}),
+  );
+
+  Map<String, dynamic> toJson() => {
+    'product_id': productId,
+    'quantity': quantity,
+  };
+
+  @override
+  List<Object?> get props => [id, userId, productId, quantity, product];
 }
+
+class ProductModel extends Equatable {
+  final int id;
+  final String name;
+  final String description;
+  final double price;
+  final int stock;
+  final String category;
+  final String imageUrl;
+  final bool isActive;
+
+  const ProductModel({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.price,
+    required this.stock,
+    required this.category,
+    required this.imageUrl,
+    required this.isActive,
+  });
+
+  factory ProductModel.fromJson(Map<String, dynamic> json) => ProductModel(
+    id: (json['ID'] as num?)?.toInt() ?? 0,
+    name: json['name'] as String? ?? '',
+    description: json['description'] as String? ?? '',
+    price: (json['price'] as num?)?.toDouble() ?? 0.0,
+    stock: (json['stock'] as num?)?.toInt() ?? 0,
+    category: json['category'] as String? ?? '',
+    imageUrl: json['image_url'] as String? ?? '',
+    isActive: json['is_active'] as bool? ?? true,
+  );
+
+  @override
+  List<Object?> get props =>
+      [id, name, description, price, stock, category, imageUrl, isActive];
+}
+
+typedef CartItem = CartItemModel;

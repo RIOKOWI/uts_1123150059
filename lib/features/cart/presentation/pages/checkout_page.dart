@@ -43,6 +43,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   @override
   Widget build(BuildContext context) {
+    final surface = Theme.of(context).colorScheme.surface;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final primary = Theme.of(context).colorScheme.primary;
+    final hintColor = Theme.of(context).hintColor;
+
     return WillPopScope(
       onWillPop: () async {
         if (_isProcessing) return false;
@@ -50,7 +55,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Checkout'),
+          backgroundColor: primary,
+          title: Text('Checkout', style: TextStyle(color: surface),),
           centerTitle: true,
           automaticallyImplyLeading: !_isProcessing,
         ),
@@ -79,22 +85,22 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     
                     Container(
                       padding: const EdgeInsets.all(16),
-                      color: Colors.blue[50],
+                      color: primary,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Ringkasan Pesanan',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: surface),
                           ),
                           const SizedBox(height: 12),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('Total Item: ${cartProvider.itemCount}'),
+                              Text('Total Item: ${cartProvider.itemCount}', style: TextStyle(color: surface),),
                               Text(
                                 'Rp ${cartProvider.totalPrice.toStringAsFixed(0)}',
-                                style: const TextStyle(fontWeight: FontWeight.bold),
+                                style: TextStyle(fontWeight: FontWeight.bold, ),
                               ),
                             ],
                           ),
@@ -120,8 +126,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                       color: Colors.grey[300],
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: item.imageUrl != null
-                                        ? Image.network(item.imageUrl!, fit: BoxFit.cover)
+                                    child: item.product.imageUrl.isNotEmpty
+                                        ? Image.network(item.product.imageUrl, fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) {
+                                              return const Icon(Icons.image, color: Colors.grey);
+                                            },)
                                         : const Icon(Icons.image, color: Colors.grey),
                                   ),
                                   const SizedBox(width: 12),
@@ -130,16 +139,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          item.productName,
+                                          item.product.name,
                                           style: const TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.bold,
                                           ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          'Qty: ${item.quantity} x Rp ${item.price.toStringAsFixed(0)}',
-                                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                          'Qty: ${item.quantity} x Rp ${item.product.price.toStringAsFixed(0)}',
+                                          style: TextStyle(fontSize: 12, color: onSurface),
                                         ),
                                       ],
                                     ),
@@ -162,8 +173,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        border: Border(top: BorderSide(color: Colors.grey[300]!)),
+                        border: Border(top: BorderSide(color: hintColor)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,

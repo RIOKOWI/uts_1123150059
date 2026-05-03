@@ -1,7 +1,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:uts_1123150059/core/constants/app_constants.dart';
+import 'package:uts_1123150059/core/constants/api_constants.dart';
 import 'package:uts_1123150059/core/services/secure_storage.dart';
 
 
@@ -16,9 +16,9 @@ class DioClient {
   static Dio _createDio() {
     final dio = Dio(
       BaseOptions(
-        baseUrl: AppConstants.baseUrl,
-        connectTimeout: Duration(milliseconds: AppConstants.connectTimeout),
-        receiveTimeout: Duration(milliseconds: AppConstants.receiveTimeout),
+        baseUrl: ApiConstants.baseUrl,
+        connectTimeout: Duration(milliseconds: ApiConstants.connectTimeout),
+        receiveTimeout: Duration(milliseconds: ApiConstants.receiveTimeout),
         headers: {'Content-Type': 'application/json'},
       ),
     );
