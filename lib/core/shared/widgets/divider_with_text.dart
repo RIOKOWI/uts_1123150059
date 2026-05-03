@@ -7,17 +7,19 @@ class DividerWithText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surface = Theme.of(context).colorScheme.surface;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Row(
       children: [
-        const Expanded(child: Divider()),
+        Expanded(child: Divider(color: onSurface,)),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: EdgeInsets.symmetric(horizontal: 12),
           child: Text(
             text,
-            style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+            style: TextStyle(color: onSurface, fontSize: 13),
           ),
         ),
-        const Expanded(child: Divider()),
+        Expanded(child: Divider(color: onSurface,)),
       ],
     );
   }
