@@ -11,6 +11,9 @@ class ApiConstants {
   // Cart endpoints
   static const String cart = '/cart';
 
+  // Order endpoints
+  static const String order = '/orders';
+
   // Timeout
   static const int connectTimeout = 15000;
   static const int receiveTimeout = 15000;
