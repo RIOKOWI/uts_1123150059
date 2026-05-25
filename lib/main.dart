@@ -9,7 +9,7 @@ import 'package:uts_1123150059/core/theme/app_theme.dart';
 import 'package:uts_1123150059/features/auth/presentation/providers/auth_provider.dart';
 import 'package:uts_1123150059/features/dashboard/presentation/providers/product_provider.dart';
 import 'package:uts_1123150059/features/cart/presentation/providers/cart_provider.dart';
-import 'package:uts_1123150059/features/cart/presentation/providers/checkout_provider.dart';
+import 'package:uts_1123150059/features/order/presentation/providers/order_provider.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -24,7 +24,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
-        ChangeNotifierProvider(create: (_) => CheckoutProvider()),
+        ChangeNotifierProvider(create: (_) => OrderProvider()),
       ],
       child: const MyApp(),
     ),
