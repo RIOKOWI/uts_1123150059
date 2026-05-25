@@ -1,24 +1,18 @@
 import 'package:uts_1123150059/features/cart/data/models/cart_item_model.dart';
 
 abstract class CartRepository {
-  // Get all cart items
+  /// Ambil isi keranjang
   Future<List<CartItemModel>> getCart();
 
-  // Add item to cart
-  Future<CartItemModel> addToCart(
-    int productId,
-    int quantity,
-  );
+  /// Tambah produk ke keranjang
+  Future<void> addToCart(int productId, int quantity);
 
-  // Update cart item quantity
-  Future<CartItemModel> updateCartItem(
-    int cartItemId,
-    int quantity,
-  );
+  /// Update jumlah item
+  Future<void> updateCartItem(int cartItemId, int quantity);
 
-  // Delete specific cart item
-  Future<void> deleteCartItem(int cartItemId);
+  /// Hapus satu item
+  Future<void> removeCartItem(int cartItemId);
 
-  // Clear all cart items
+  /// Kosongkan keranjang
   Future<void> clearCart();
 }
