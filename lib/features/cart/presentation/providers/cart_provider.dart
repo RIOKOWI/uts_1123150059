@@ -2,125 +2,101 @@ import 'package:flutter/foundation.dart';
 import 'package:uts_1123150059/features/cart/data/models/cart_item_model.dart';
 import 'package:uts_1123150059/features/cart/domain/repositories/cart_repository_impl.dart';
 
+enum CartStatus { initial, loading, loaded, error }
+
 class CartProvider extends ChangeNotifier {
   final CartRepositoryImpl _repository = CartRepositoryImpl();
 
-  List<CartItemModel> _items = [];
-  bool _isLoading = false;
-  String? _errorMessage;
+  CartStatus _status = CartStatus.initial;
+  CartModel? _cart;
+  String? _error;
+  bool _isAdding = false; // flag khusus saat tambah ke cart
 
-  List<CartItemModel> get items => _items;
-  bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
+  CartStatus get status => _status;
+  CartModel? get cart => _cart;
+  String? get error => _error;
+  bool get isAdding => _isAdding;
 
-  int get itemCount => _items.length;
+  // Getter untuk badge di bottom nav
+  int get itemCount => _cart?.itemCount ?? 0;
+  double get totalPrice => _cart?.totalPrice ?? 0;
+  List<CartItemModel> get items => _cart?.items ?? [];
 
-  double get totalPrice {
-    return _items.fold(0.0, (sum, item) => sum + item.totalPrice);
-  }
-
-  // Load cart from API
-  Future<void> loadCart() async {
-    _isLoading = true;
-    _errorMessage = null;
+  Future<void> fetchCart() async {
+    _status = CartStatus.loading;
+    _error = null;
     notifyListeners();
 
     try {
-      _items = await _repository.getCart();
-      _errorMessage = null;
+      final items = await _repository.getCart();
+      _cart = CartModel(
+        items: items,
+        itemCount: items.length,
+        totalPrice: items.fold(0.0, (sum, item) => sum + item.calculatedSubtotal),
+      );
+      _status = CartStatus.loaded;
+      _error = null;
     } catch (e) {
-      _errorMessage = 'Gagal memuat keranjang: ${e.toString()}';
-      _items = [];
-    } finally {
-      _isLoading = false;
+      _status = CartStatus.error;
+      _error = 'Gagal memuat keranjang: ${e.toString()}';
+      _cart = null;
+    }
+    notifyListeners();
+  }
+
+  Future<bool> addToCart(int productId, int quantity) async {
+    _isAdding = true;
+    notifyListeners();
+
+    try {
+      await _repository.addToCart(productId, quantity);
+      await fetchCart(); // Refresh data cart setelah berhasil
+      _isAdding = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _isAdding = false;
+      _error = 'Gagal menambahkan ke keranjang: ${e.toString()}';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<void> updateItem(int cartItemId, int quantity) async {
+    try {
+      await _repository.updateCartItem(cartItemId, quantity);
+      await fetchCart(); // Refresh data setelah update
+    } catch (e) {
+      _error = 'Gagal memperbarui item: ${e.toString()}';
       notifyListeners();
     }
   }
 
-  // Add item to cart
-  Future<void> addItem(int productId, int quantity) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      final newItem = await _repository.addToCart(productId, quantity);
-      // Find and update existing item or add new one
-      final existingIndex =
-          _items.indexWhere((item) => item.productId == productId);
-      if (existingIndex != -1) {
-        _items[existingIndex] = newItem;
-      } else {
-        _items.add(newItem);
-      }
-      _errorMessage = null;
-    } catch (e) {
-      _errorMessage = 'Gagal menambahkan ke keranjang: ${e.toString()}';
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  // Remove item from cart
   Future<void> removeItem(int cartItemId) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
     try {
-      await _repository.deleteCartItem(cartItemId);
-      _items.removeWhere((item) => item.id == cartItemId);
-      _errorMessage = null;
+      await _repository.removeCartItem(cartItemId);
+      await fetchCart(); // Refresh data setelah hapus
     } catch (e) {
-      _errorMessage = 'Gagal menghapus item: ${e.toString()}';
-    } finally {
-      _isLoading = false;
+      _error = 'Gagal menghapus item: ${e.toString()}';
       notifyListeners();
     }
   }
 
-  // Update item quantity
-  Future<void> updateItemQuantity(int cartItemId, int quantity) async {
-    if (quantity <= 0) {
-      await removeItem(cartItemId);
-      return;
-    }
-
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      final updatedItem = await _repository.updateCartItem(cartItemId, quantity);
-      final index = _items.indexWhere((item) => item.id == cartItemId);
-      if (index != -1) {
-        _items[index] = updatedItem;
-      }
-      _errorMessage = null;
-    } catch (e) {
-      _errorMessage = 'Gagal memperbarui item: ${e.toString()}';
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  // Clear cart
   Future<void> clearCart() async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
     try {
       await _repository.clearCart();
-      _items.clear();
-      _errorMessage = null;
+      // Langsung set state ke kosong tanpa fetch ulang — lebih cepat
+      _cart = const CartModel(items: [], itemCount: 0, totalPrice: 0);
+      _status = CartStatus.loaded;
+      notifyListeners();
     } catch (e) {
-      _errorMessage = 'Gagal mengosongkan keranjang: ${e.toString()}';
-    } finally {
-      _isLoading = false;
+      _error = 'Gagal mengosongkan keranjang: ${e.toString()}';
       notifyListeners();
     }
+  }
+
+  void resetError() {
+    _error = null;
+    notifyListeners();
   }
 }
