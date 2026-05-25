@@ -1,41 +1,127 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/cart_provider.dart';
-import 'payment_success_page.dart';
+import 'package:uts_1123150059/core/routes/app_router.dart';
+import 'package:uts_1123150059/features/cart/presentation/providers/cart_provider.dart';
+import 'package:uts_1123150059/features/order/presentation/providers/order_provider.dart';
 
 class CheckoutPage extends StatefulWidget {
-  const CheckoutPage({Key? key}) : super(key: key);
+  const CheckoutPage({super.key});
 
   @override
   State<CheckoutPage> createState() => _CheckoutPageState();
 }
 
 class _CheckoutPageState extends State<CheckoutPage> {
-  bool _isProcessing = false;
+  final _formKey = GlobalKey<FormState>();
+  final _addressCtrl = TextEditingController();
+  final _notesCtrl = TextEditingController();
+  String? _selectedPaymentMethod;
 
-  void _processCheckout() async {
-    setState(() {
-      _isProcessing = true;
-    });
+  static const List<_PaymentOption> _paymentOptions = [
+    _PaymentOption(
+      value: 'gopay',
+      label: 'GoPay',
+      subtitle: 'Bayar instant dengan GoPay',
+      icon: Icons.account_balance_wallet,
+      iconColor: Color(0xFF00ADB5),
+    ),
+    _PaymentOption(
+      value: 'bank_transfer',
+      label: 'Transfer Bank',
+      subtitle: 'BCA, Mandiri, BNI, BRI',
+      icon: Icons.account_balance,
+      iconColor: Color(0xFF1565C0),
+    ),
+    _PaymentOption(
+      value: 'virtual_account',
+      label: 'Virtual Account',
+      subtitle: 'Nomor VA otomatis digenerate',
+      icon: Icons.credit_card,
+      iconColor: Color(0xFFE65100),
+    ),
+  ];
 
-    // Simulasi proses pembayaran
-    await Future.delayed(const Duration(seconds: 2));
+  @override
+  void dispose() {
+    _addressCtrl.dispose();
+    _notesCtrl.dispose();
+    super.dispose();
+  }
 
-    if (mounted) {
-      setState(() {
-        _isProcessing = false;
-      });
+  String _formatPrice(double price) {
+    final str = price.toInt().toString();
+    final buffer = StringBuffer();
+    int count = 0;
+    for (int i = str.length - 1; i >= 0; i--) {
+      if (count > 0 && count % 3 == 0) buffer.write('.');
+      buffer.write(str[i]);
+      count++;
+    }
+    return 'Rp. ${buffer.toString().split('').reversed.join()}';
+  }
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PaymentSuccessPage(
-            onSuccess: () {
-              
-              context.read<CartProvider>().clearCart();
-              Navigator.popUntil(context, (route) => route.isFirst);
-            },
-          ),
+  Future<void> _placeOrder(BuildContext context) async {
+    if (!_formKey.currentState!.validate()) return;
+    if (_selectedPaymentMethod == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pilih metode pembayaran terlebih dahulu'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final orderProv = context.read<OrderProvider>();
+    final cartProv = context.read<CartProvider>();
+
+    // Show loading overlay
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    final success = await orderProv.checkout(
+      shippingAddress: _addressCtrl.text.trim(),
+      notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
+      paymentMethod: _selectedPaymentMethod!,
+    );
+
+    if (!context.mounted) return;
+    Navigator.pop(context); // dismiss loading
+
+    if (success) {
+      await cartProv.clearCart();
+      if (!context.mounted) return;
+
+      final order = orderProv.lastOrder!;
+      final needsPaymentFlow =
+          order.paymentMethod == 'virtual_account' ||
+          order.paymentMethod == 'gopay';
+
+      if (needsPaymentFlow) {
+        // VA & GoPay: tampilkan halaman proses pembayaran
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRouter.paymentPending,
+          (route) => route.settings.name == AppRouter.dashboard,
+          arguments: order,
+        );
+      } else {
+        // Bank Transfer & lainnya: langsung ke halaman sukses
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRouter.orderSuccess,
+          (route) => route.settings.name == AppRouter.dashboard,
+          arguments: order,
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(orderProv.error ?? 'Gagal membuat pesanan'),
+          backgroundColor: Colors.red,
         ),
       );
     }
@@ -43,190 +129,333 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   @override
   Widget build(BuildContext context) {
-    final surface = Theme.of(context).colorScheme.surface;
+    final cartProv = context.watch<CartProvider>();
+    final cart = cartProv.cart;
     final onSurface = Theme.of(context).colorScheme.onSurface;
+    final surface = Theme.of(context).colorScheme.surface;
     final primary = Theme.of(context).colorScheme.primary;
-    final hintColor = Theme.of(context).hintColor;
 
-    return WillPopScope(
-      onWillPop: () async {
-        if (_isProcessing) return false;
-        return true;
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: primary,
-          title: Text('Checkout', style: TextStyle(color: surface),),
-          centerTitle: true,
-          automaticallyImplyLeading: !_isProcessing,
-        ),
-        body: Consumer<CartProvider>(
-          builder: (context, cartProvider, _) {
-            if (cartProvider.items.isEmpty) {
-              return Center(
+    return Scaffold(
+      appBar: AppBar(title: const Text('Checkout')),
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── 1. Ringkasan Pesanan ───────────────────────
+              _SectionTitle(title: 'Ringkasan Pesanan'),
+              const SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  color: surface,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Tidak Ada Item di Keranjang',
-                      style: TextStyle(fontSize: 18, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            return Stack(
-              children: [
-                Column(
-                  children: [
-                    
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      color: primary,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Ringkasan Pesanan',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: surface),
+                    if (cart != null) ...[
+                      ...cart.items.map(
+                        (item) => Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
                           ),
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          child: Row(
                             children: [
-                              Text('Total Item: ${cartProvider.itemCount}', style: TextStyle(color: surface),),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item.product.name,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color: onSurface,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${item.quantity} x ${_formatPrice(item.product.price)}',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: onSurface.withValues(alpha: 0.5),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                               Text(
-                                'Rp ${cartProvider.totalPrice.toStringAsFixed(0)}',
-                                style: TextStyle(fontWeight: FontWeight.bold, ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: cartProvider.items.length,
-                        itemBuilder: (context, index) {
-                          final item = cartProvider.items[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 60,
-                                    height: 60,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[300],
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: item.product.imageUrl.isNotEmpty
-                                        ? Image.network(item.product.imageUrl, fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) {
-                                              return const Icon(Icons.image, color: Colors.grey);
-                                            },)
-                                        : const Icon(Icons.image, color: Colors.grey),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          item.product.name,
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          'Qty: ${item.quantity} x Rp ${item.product.price.toStringAsFixed(0)}',
-                                          style: TextStyle(fontSize: 12, color: onSurface),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Text(
-                                    'Rp ${item.totalPrice.toStringAsFixed(0)}',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        border: Border(top: BorderSide(color: hintColor)),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Total Harga:',
+                                _formatPrice(item.calculatedSubtotal),
                                 style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                'Rp ${cartProvider.totalPrice.toStringAsFixed(0)}',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: onSurface,
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 12),
-                          ElevatedButton(
-                            onPressed: _isProcessing ? null : _processCheckout,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                      ),
+                      const Divider(height: 1),
+                    ],
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Total',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
                             ),
-                            child: _isProcessing
-                                ? const SizedBox(
-                                    height: 24,
-                                    width: 24,
-                                    child: CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Text(
-                                    'Checkout',
-                                    style: TextStyle(fontSize: 16, color: Colors.white),
-                                  ),
+                          ),
+                          Text(
+                            _formatPrice(cart?.totalPrice ?? 0),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: primary,
+                            ),
                           ),
                         ],
                       ),
                     ),
                   ],
                 ),
-              ],
-            );
-          },
+              ),
+
+              const SizedBox(height: 24),
+
+              // ── 2. Alamat Pengiriman ───────────────────────
+              _SectionTitle(title: 'Alamat Pengiriman'),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _addressCtrl,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: 'Masukkan alamat lengkap pengiriman...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: surface,
+                ),
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) {
+                    return 'Alamat pengiriman wajib diisi';
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 24),
+
+              // ── 3. Catatan ─────────────────────────────────
+              _SectionTitle(title: 'Catatan (opsional)'),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _notesCtrl,
+                maxLines: 2,
+                decoration: InputDecoration(
+                  hintText: 'Tambahkan catatan untuk penjual...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: surface,
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // ── 4. Metode Pembayaran ───────────────────────
+              _SectionTitle(title: 'Metode Pembayaran'),
+              const SizedBox(height: 8),
+              ..._paymentOptions.map(
+                (option) => _PaymentOptionCard(
+                  option: option,
+                  isSelected: _selectedPaymentMethod == option.value,
+                  onSelect: () =>
+                      setState(() => _selectedPaymentMethod = option.value),
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // ── 5. Tombol Place Order ──────────────────────
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () => _placeOrder(context),
+                  child: const Text(
+                    'Place Order',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Section Title ──────────────────────────────────────────
+class _SectionTitle extends StatelessWidget {
+  final String title;
+
+  const _SectionTitle({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+    );
+  }
+}
+
+// ── Payment Option Card ────────────────────────────────────
+class _PaymentOption {
+  final String value;
+  final String label;
+  final String subtitle;
+  final IconData icon;
+  final Color iconColor;
+
+  const _PaymentOption({
+    required this.value,
+    required this.label,
+    required this.subtitle,
+    required this.icon,
+    required this.iconColor,
+  });
+}
+
+class _PaymentOptionCard extends StatelessWidget {
+  final _PaymentOption option;
+  final bool isSelected;
+  final VoidCallback onSelect;
+
+  const _PaymentOptionCard({
+    required this.option,
+    required this.isSelected,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final surface = Theme.of(context).colorScheme.surface;
+    final primary = Theme.of(context).colorScheme.primary;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+
+    return GestureDetector(
+      onTap: onSelect,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+          color: surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? primary : Colors.transparent,
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: option.iconColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(option.icon, color: option.iconColor, size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      option.label,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: onSurface,
+                      ),
+                    ),
+                    Text(
+                      option.subtitle,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: onSurface.withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isSelected ? primary : onSurface.withValues(alpha: 0.3),
+                    width: 2,
+                  ),
+                ),
+                child: isSelected
+                    ? Center(
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: primary,
+                          ),
+                        ),
+                      )
+                    : null,
+              ),
+            ],
+          ),
         ),
       ),
     );
