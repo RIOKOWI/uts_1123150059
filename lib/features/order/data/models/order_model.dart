@@ -50,6 +50,18 @@ class OrderModel extends Equatable {
   final String createdAt;
   final String? vaNumber;
   final String? gopayDeeplink;
+  /// // URL callback untuk Dompet Kampus Global (deep-link return URL)
+  /// //
+  /// // Format: `gocap://payment-callback?status=...&reference=...&transaction_id=...`
+  /// //
+  /// // Parameter:
+  /// // - `status`: 'success' | 'failed' | 'pending' | 'cancelled'
+  /// // - `reference`: Reference ID pesanan (INV-{orderId})
+  /// // - `transaction_id`: Transaction ID dari Dompet Kampus Global
+  /// //
+  /// // Contoh URI lengkap:
+  /// // `gocap://payment-callback?status=success&reference=INV-123&transaction_id=TRX-456`
+  final String? callbackUrl;
 
   const OrderModel({
     required this.id,
@@ -62,6 +74,7 @@ class OrderModel extends Equatable {
     required this.createdAt,
     this.vaNumber,
     this.gopayDeeplink,
+    this.callbackUrl,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -86,6 +99,7 @@ class OrderModel extends Equatable {
       createdAt: json['created_at'] as String? ?? json['createdAt'] as String? ?? '',
       vaNumber: json['va_number'] as String? ?? json['vaNumber'] as String?,
       gopayDeeplink: json['gopay_deeplink'] as String? ?? json['gopayDeeplink'] as String?,
+      callbackUrl: json['callback_url'] as String? ?? json['callbackUrl'] as String?,
     );
   }
 
@@ -100,6 +114,7 @@ class OrderModel extends Equatable {
         'created_at': createdAt,
         if (vaNumber != null) 'va_number': vaNumber,
         if (gopayDeeplink != null) 'gopay_deeplink': gopayDeeplink,
+        if (callbackUrl != null) 'callback_url': callbackUrl,
       };
 
   @override
@@ -114,5 +129,6 @@ class OrderModel extends Equatable {
         createdAt,
         vaNumber,
         gopayDeeplink,
+        callbackUrl,
       ];
 }
