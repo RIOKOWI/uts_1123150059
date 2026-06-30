@@ -3,6 +3,7 @@ import 'package:uts_1123150059/core/routes/app_router.dart';
 import 'package:uts_1123150059/features/cart/data/models/cart_item_model.dart';
 import 'package:uts_1123150059/features/cart/presentation/providers/cart_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:uts_1123150059/core/shared/widgets/neumorphic_container.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -205,18 +206,8 @@ class _CartItemCard extends StatelessWidget {
     final onSurface = Theme.of(context).colorScheme.onSurface;
     final primary = Theme.of(context).colorScheme.primary;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return NeumorphicContainer(
+      borderRadius: 16,
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
