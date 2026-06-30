@@ -50,14 +50,14 @@ class OrderModel extends Equatable {
   final String createdAt;
   final String? vaNumber;
   final String? gopayDeeplink;
-  /// // URL callback untuk Dompet Kampus Global (deep-link return URL)
+  /// // URL callback untuk Gocap (deep-link return URL)
   /// //
   /// // Format: `gocap://payment-callback?status=...&reference=...&transaction_id=...`
   /// //
   /// // Parameter:
   /// // - `status`: 'success' | 'failed' | 'pending' | 'cancelled'
   /// // - `reference`: Reference ID pesanan (INV-{orderId})
-  /// // - `transaction_id`: Transaction ID dari Dompet Kampus Global
+  /// // - `transaction_id`: Transaction ID dari Gocap
   /// //
   /// // Contoh URI lengkap:
   /// // `gocap://payment-callback?status=success&reference=INV-123&transaction_id=TRX-456`
@@ -92,9 +92,13 @@ class OrderModel extends Equatable {
           json['shippingAddress'] as String? ??
           '',
       notes: json['notes'] as String? ?? '',
-      paymentMethod: json['payment_method'] as String? ??
-          json['paymentMethod'] as String? ??
-          '',
+      paymentMethod: (json['payment_method'] as String? ??
+              json['paymentMethod'] as String? ??
+              '') == 'dompet_kampus_global' || (json['payment_method'] as String? ?? json['paymentMethod'] as String? ?? '') == 'global_institute_pay'
+          ? 'gocap'
+          : (json['payment_method'] as String? ??
+              json['paymentMethod'] as String? ??
+              ''),
       items: itemsList,
       createdAt: json['created_at'] as String? ?? json['createdAt'] as String? ?? '',
       vaNumber: json['va_number'] as String? ?? json['vaNumber'] as String?,
@@ -131,4 +135,32 @@ class OrderModel extends Equatable {
         gopayDeeplink,
         callbackUrl,
       ];
+
+  OrderModel copyWith({
+    int? id,
+    double? totalAmount,
+    String? status,
+    String? shippingAddress,
+    String? notes,
+    String? paymentMethod,
+    List<OrderItemModel>? items,
+    String? createdAt,
+    String? vaNumber,
+    String? gopayDeeplink,
+    String? callbackUrl,
+  }) {
+    return OrderModel(
+      id: id ?? this.id,
+      totalAmount: totalAmount ?? this.totalAmount,
+      status: status ?? this.status,
+      shippingAddress: shippingAddress ?? this.shippingAddress,
+      notes: notes ?? this.notes,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      items: items ?? this.items,
+      createdAt: createdAt ?? this.createdAt,
+      vaNumber: vaNumber ?? this.vaNumber,
+      gopayDeeplink: gopayDeeplink ?? this.gopayDeeplink,
+      callbackUrl: callbackUrl ?? this.callbackUrl,
+    );
+  }
 }
