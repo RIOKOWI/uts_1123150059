@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:uts_1123150059/core/routes/app_router.dart';
 import 'package:uts_1123150059/features/cart/presentation/providers/cart_provider.dart';
 import 'package:uts_1123150059/features/order/presentation/providers/order_provider.dart';
+import 'package:uts_1123150059/features/order/presentation/pages/payment_pending_page.dart';
+import 'package:uts_1123150059/core/shared/widgets/neumorphic_container.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -18,12 +20,19 @@ class _CheckoutPageState extends State<CheckoutPage> {
   String? _selectedPaymentMethod;
 
   static const List<_PaymentOption> _paymentOptions = [
+    // _PaymentOption(
+    //   value: 'gopay',
+    //   label: 'GoPay',
+    //   subtitle: 'Bayar instant dengan GoPay',
+    //   icon: Icons.account_balance_wallet,
+    //   iconColor: Color(0xFF00ADB5),
+    // ),
     _PaymentOption(
-      value: 'gopay',
-      label: 'GoPay',
-      subtitle: 'Bayar instant dengan GoPay',
+      value: 'gocap',
+      label: 'Gocap',
+      subtitle: 'Bayar instan dengan aplikasi Gocap',
       icon: Icons.account_balance_wallet,
-      iconColor: Color(0xFF00ADB5),
+      iconColor: Color(0xFF1A237E),
     ),
     _PaymentOption(
       value: 'bank_transfer',
@@ -97,16 +106,26 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
       final order = orderProv.lastOrder!;
       final needsPaymentFlow =
-          order.paymentMethod == 'virtual_account' ||
-          order.paymentMethod == 'gopay';
+          _selectedPaymentMethod == 'virtual_account' ||
+          _selectedPaymentMethod == 'gocap' ||
+          _selectedPaymentMethod == 'gopay';
 
       if (needsPaymentFlow) {
-        // VA & GoPay: tampilkan halaman proses pembayaran
+        // Pastikan paymentMethod pada order sesuai pilihan user,
+        // karena backend mungkin mengembalikan nilai berbeda.
+        final orderToPass = order.paymentMethod == _selectedPaymentMethod
+            ? order
+            : order.copyWith(paymentMethod: _selectedPaymentMethod!);
+
+        // Simpan order sebagai pending untuk cold-start scenario
+        await PaymentPendingPage.storePendingOrder(orderToPass);
+
+        // VA, Gocap, & GoPay: tampilkan halaman proses pembayaran
         Navigator.pushNamedAndRemoveUntil(
           context,
           AppRouter.paymentPending,
           (route) => route.settings.name == AppRouter.dashboard,
-          arguments: order,
+          arguments: orderToPass,
         );
       } else {
         // Bank Transfer & lainnya: langsung ke halaman sukses
@@ -147,18 +166,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
               // ── 1. Ringkasan Pesanan ───────────────────────
               _SectionTitle(title: 'Ringkasan Pesanan'),
               const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(
-                  color: surface,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
+              NeumorphicContainer(
+                borderRadius: 12,
                 child: Column(
                   children: [
                     if (cart != null) ...[
