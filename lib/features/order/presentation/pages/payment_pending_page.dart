@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -8,25 +8,57 @@ import 'package:uts_1123150059/core/routes/app_router.dart';
 import 'package:uts_1123150059/core/services/global_institute_pay_service.dart';
 import 'package:uts_1123150059/features/order/data/models/order_model.dart';
 import 'package:uts_1123150059/features/order/presentation/providers/order_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uts_1123150059/core/shared/widgets/neumorphic_container.dart';
 
 /// // Log helper untuk debugging
-void _log(String msg) => debugPrint('[dompetkampus/PaymentPending] $msg');
+void _log(String msg) => debugPrint('[gocap/PaymentPending] $msg');
 
 /// // Halaman pembayaran yang menunggu konfirmasi.
 /// //
 /// // Mendukung:
 /// // 1. Virtual Account - tampilkan nomor VA dan instruksi
 /// // 2. GoPay - buka aplikasi GoPay via deeplink
-/// // 3. Dompet Kampus Global - terima callback via deep-link
+/// // 3. Gocap - terima callback via deep-link
 /// //
-/// // Untuk Dompet Kampus Global:
-/// // - auto-launch Dompet Kampus Global saat halaman dimuat
+/// // Untuk Gocap:
+/// // - auto-launch Gocap saat halaman dimuat
 /// // - terima callback via GlobalInstitutePayService
 /// // - handle cold-start scenario (app dibuka via deeplink langsung)
 class PaymentPendingPage extends StatefulWidget {
   final OrderModel order;
 
   const PaymentPendingPage({super.key, required this.order});
+
+  // Static storage untuk cold-start scenario (persisted)
+  static const String _storageKey = 'pending_order_json';
+
+  /// Simpan order saat checkout (dipanggil dari checkout_page.dart)
+  static Future<void> storePendingOrder(OrderModel order) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_storageKey, jsonEncode(order.toJson()));
+    _log(' Order disimpan sebagai pending: id=${order.id}');
+  }
+
+  /// Ambil stored order (dipanggil dari SplashPage)
+  static Future<OrderModel?> consumePendingOrder() async {
+    final prefs = await SharedPreferences.getInstance();
+    final json = prefs.getString(_storageKey);
+    if (json != null) {
+      await prefs.remove(_storageKey);
+      final order = OrderModel.fromJson(jsonDecode(json));
+      _log(' Pending order dikonsumsi: id=${order.id}');
+      return order;
+    }
+    return null;
+  }
+
+  /// Hapus pending order tanpa dikonsumsi (misal: payment timeout)
+  static Future<void> clearPendingOrder() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_storageKey);
+    _log(' Pending order dihapus');
+  }
 
   @override
   State<PaymentPendingPage> createState() => _PaymentPendingPageState();
@@ -49,20 +81,20 @@ class _PaymentPendingPageState extends State<PaymentPendingPage>
 
     WidgetsBinding.instance.addObserver(this);
 
-    // ── Dompet Kampus Global: auto-launch saat halaman dimuat ──
-    /// // Cek apakah payment method adalah Dompet Kampus Global.
-    /// // Jika ya, auto-launch Dompet Kampus Global setelah frame pertama.
+    // ── Gocap: auto-launch saat halaman dimuat ──
+    /// // Cek apakah payment method adalah Gocap.
+    /// // Jika ya, auto-launch Gocap setelah frame pertama.
     /// //
-    /// // Dompet Kampus Global akan menangani pembayaran dan mengembalikan
+    /// // Gocap akan menangani pembayaran dan mengembalikan
     /// // kontrol via deep-link callback.
-    if (widget.order.paymentMethod == 'dompet_kampus_global') {
-      _log(' Akan auto-launch Dompet Kampus Global setelah frame pertama');
+    if (widget.order.paymentMethod == 'gocap') {
+      _log(' Akan auto-launch Gocap setelah frame pertama');
       WidgetsBinding.instance.addPostFrameCallback(
         (_) => _launchDompetKampusGlobal(),
       );
     } else {
       _log(
-        'ℹ Metode bukan dompet_kampus_global → skip auto-launch '
+        'ℹ Metode bukan gocap → skip auto-launch '
         '(method=${widget.order.paymentMethod})',
       );
     }
@@ -77,7 +109,7 @@ class _PaymentPendingPageState extends State<PaymentPendingPage>
     /// // Handle cold-start scenario: app dibuka via deeplink langsung.
     /// //
     /// // Ini terjadi ketika:
-    /// // 1. User belum install Dompet Kampus Global, tapi sudah bayar
+    /// // 1. User belum install Gocap, tapi sudah bayar
     /// // 2. User membuka app via notification deep-link
     final pending = GlobalInstitutePayService().consumePendingCallback();
     if (pending != null) {
@@ -95,10 +127,10 @@ class _PaymentPendingPageState extends State<PaymentPendingPage>
     }
 
     // ── Subscribe stream callback ────────────────────────────────
-    /// // Listen callback dari Dompet Kampus Global via stream.
+    /// // Listen callback dari Gocap via stream.
     /// //
     /// // Callback ini datang ketika:
-    /// // 1. User sudah di dalam app, Dompet Kampus Global mengembalikan kontrol
+    /// // 1. User sudah di dalam app, Gocap mengembalikan kontrol
     /// // 2. User menyelesaikan pembayaran
     _log(' Subscribe GlobalInstitutePayService.onCallback stream...');
     _callbackSub = GlobalInstitutePayService().onCallback.listen((data) {
@@ -140,7 +172,7 @@ class _PaymentPendingPageState extends State<PaymentPendingPage>
     /// // Cek status pembayaran saat app di-resume.
     /// //
     /// // Ini menangkap kasus dimana:
-    /// // 1. User kembali dari Dompet Kampus Global
+    /// // 1. User kembali dari Gocap
     /// // 2. Payment sudah berhasil tapi callback tidak tertangkap
     if (state == AppLifecycleState.resumed && _payLaunched) {
       _log(
@@ -150,18 +182,18 @@ class _PaymentPendingPageState extends State<PaymentPendingPage>
     }
   }
 
-  /// // Launch Dompet Kampus Global via deep-link.
+  /// // Launch Gocap via deep-link.
   /// //
   /// // Format URI yang dibangun:
-  /// // `dompetkampus://pay?merchant_id=...&merchant_name=...&amount=...&description=...&reference=...&callback=...`
+  /// // `gocap://pay?merchant_id=...&merchant_name=...&amount=...&description=...&reference=...&callback=...`
   /// //
   /// // Parameter URI:
-  /// // - `merchant_id`: ID merchant (misal: MCH_GOCAP)
-  /// // - `merchant_name`: Nama merchant (misal: 'Gocap')
+  /// // - `merchant_id`: ID merchant (misal: MCH_WARMINDO)
+  /// // - `merchant_name`: Nama merchant (misal: 'Warmindo')
   /// // - `amount`: Total amount dalam integer
   /// // - `description`: Deskripsi pesanan
   /// // - `reference`: Reference ID (INV-{orderId})
-  /// // - `callback`: URL callback untuk kembali ke Gocap (gocap://payment-callback)
+  /// // - `callback`: URL callback untuk kembali ke Warmindo (warmindo://payment-callback)
   Future<void> _launchDompetKampusGlobal() async {
     _log('─── _launchDompetKampusGlobal ───');
     _log(
@@ -169,36 +201,16 @@ class _PaymentPendingPageState extends State<PaymentPendingPage>
       '| notes="${widget.order.notes}"',
     );
 
-    // Build URI untuk Dompet Kampus Global
-    /// // Callback URL yang akan digunakan oleh Dompet Kampus Global
-    /// // untuk mengembalikan kontrol ke aplikasi Gocap.
-    final callbackUrl = GlobalInstitutePayService.buildCallbackUrl(
-      status: 'pending',
-      reference: 'INV-${widget.order.id}',
+    final notes = widget.order.notes.isNotEmpty ? widget.order.notes : null;
+
+    // Build URL — detail parameter sudah dilog di dalam service
+    final deeplinkUrl = GlobalInstitutePayService.buildDeeplinkUrl(
+      orderId: widget.order.id,
+      amount: widget.order.totalAmount,
+      description: notes,
     );
 
-    /// // Bangun URL deep-link untuk Dompet Kampus Global.
-    /// //
-    /// // ⚠️ Catatan: Anda perlu menyesuaikan ini dengan API Dompet Kampus Global
-    /// // Format yang diharapkan bisa berbeda. Berikut adalah contoh:
-    /// //
-    /// // Contoh URI lengkap:
-    /// // `dompetkampus://pay?merchant_id=MCH_GOCAP&merchant_name=Gocap&amount=50000&description=Order%20%23123&reference=INV-123&callback=gocap://payment-callback`
-    final uri = Uri(
-      scheme: 'dompetkampus',
-      host: 'pay',
-      queryParameters: {
-        'merchant_id': 'MCH_GOCAP',
-        'merchant_name': 'Gocap',
-        'amount': widget.order.totalAmount.toInt().toString(),
-        'description': widget.order.notes.isNotEmpty
-            ? widget.order.notes
-            : 'Order #${widget.order.id}',
-        'reference': 'INV-${widget.order.id}',
-        'callback': callbackUrl,
-      },
-    );
-
+    final uri = Uri.parse(deeplinkUrl);
     _log(' URI yang akan diluncurkan: $uri');
 
     // canLaunchUrl hanya untuk diagnosis
@@ -209,18 +221,18 @@ class _PaymentPendingPageState extends State<PaymentPendingPage>
       _log(' canLaunchUrl=false — tetap mencoba launchUrl langsung...');
       _log(' Kemungkinan penyebab:');
       _log(' 1. APK belum di-rebuild setelah perubahan AndroidManifest.xml');
-      _log(' 2. Aplikasi Dompet Kampus Global belum terinstal');
+      _log(' 2. Aplikasi Gocap belum terinstal');
     }
 
     _log(' Memanggil launchUrl (mode=externalApplication)...');
     try {
       final launched = await launchUrl(
         uri,
-        mode: LaunchMode.externalApplication,
+        mode: LaunchMode.externalNonBrowserApplication,
       );
       _log(' launchUrl → $launched');
       if (launched) {
-        _log(' Dompet Kampus Global berhasil dibuka');
+        _log(' Gocap berhasil dibuka');
         setState(() => _payLaunched = true);
       } else {
         _log(' launchUrl=false — aplikasi ada tapi tidak merespons');
@@ -229,7 +241,7 @@ class _PaymentPendingPageState extends State<PaymentPendingPage>
       }
     } catch (e) {
       _log(' Exception launchUrl: $e');
-      _log('→ Aplikasi Dompet Kampus Global kemungkinan tidak terinstal');
+      _log('→ Aplikasi Gocap kemungkinan tidak terinstal');
       if (!mounted) return;
       _showAppNotFoundDialog();
     }
@@ -275,12 +287,12 @@ class _PaymentPendingPageState extends State<PaymentPendingPage>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Aplikasi Dompet Kampus Global tidak terinstal di perangkat ini.',
+              'Aplikasi Gocap tidak terinstal di perangkat ini.',
             ),
             SizedBox(height: 12),
             Text(
               'Pesanan Anda tetap tersimpan. Lakukan pembayaran melalui aplikasi '
-              'Dompet Kampus Global, lalu kembali untuk mengecek status.',
+              'Gocap, lalu kembali untuk mengecek status.',
               style: TextStyle(fontSize: 13, color: Colors.grey),
             ),
           ],
@@ -317,7 +329,7 @@ class _PaymentPendingPageState extends State<PaymentPendingPage>
     /// //
     /// // Virtual Account → tampilkan nomor VA
     /// // GoPay → tampilkan instruksi GoPay
-    /// // Dompet Kampus Global → tampilkan instruksi dan auto-launch
+    /// // Gocap → tampilkan instruksi dan auto-launch
     return PopScope(
       // Cegah tombol back saat pembayaran masih pending
       canPop: false,
@@ -340,7 +352,7 @@ class _PaymentPendingPageState extends State<PaymentPendingPage>
                 onCheckStatus: () =>
                     context.read<OrderProvider>().checkPaymentStatus(order.id),
               )
-            : order.paymentMethod == 'dompet_kampus_global'
+            : order.paymentMethod == 'gocap'
                 ? _DompetKampusGlobalBody(
                     order: order,
                     payStatus: payStatus,
@@ -520,19 +532,8 @@ class _VirtualAccountBody extends StatelessWidget {
           // ── Nomor VA ────────────────────────────────────────
           _SectionLabel(label: 'Nomor Virtual Account'),
           const SizedBox(height: 8),
-          Container(
-            decoration: BoxDecoration(
-              color: surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: primary.withValues(alpha: 0.3)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
+          NeumorphicContainer(
+            borderRadius: 12,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
               children: [
@@ -599,18 +600,8 @@ class _VirtualAccountBody extends StatelessWidget {
           // ── Cara Bayar ─────────────────────────────────────
           _SectionLabel(label: 'Cara Pembayaran'),
           const SizedBox(height: 10),
-          Container(
-            decoration: BoxDecoration(
-              color: surface,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
+          NeumorphicContainer(
+            borderRadius: 12,
             child: Column(
               children: [
                 for (int i = 0; i < _banks.length; i++) ...[
@@ -701,18 +692,18 @@ class _BankStepTile extends StatelessWidget {
 }
 
 // ──────────────────────────────────────────────────────────────
-// Dompet Kampus Global Body
+// Gocap Body
 // ──────────────────────────────────────────────────────────────
 
-/// // Body untuk pembayaran via Dompet Kampus Global.
+/// // Body untuk pembayaran via Gocap.
 /// //
 /// // Menampilkan:
 /// // - Langkah-langkah pembayaran
-/// // - Tombol untuk membuka Dompet Kampus Global
+/// // - Tombol untuk membuka Gocap
 /// // - Status pembayaran
 /// //
 /// // Deep-link yang digunakan:
-/// // - Scheme: `dompetkampus`
+/// // - Scheme: `gocap`
 /// // - Host: `pay`
 class _DompetKampusGlobalBody extends StatelessWidget {
   final OrderModel order;
@@ -731,8 +722,7 @@ class _DompetKampusGlobalBody extends StatelessWidget {
     required this.onCheckStatus,
   });
 
-  /// // Warna tema Dompet Kampus Global.
-  /// // ⚠️ Anda bisa mengubah ini sesuai warna resmi Dompet Kampus Global.
+  /// // Warna tema Gocap.
   static const _brandColor = Color(0xFF1A237E);
 
   @override
@@ -763,7 +753,7 @@ class _DompetKampusGlobalBody extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Bayar dengan Dompet Kampus Global',
+            'Bayar dengan Gocap',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
@@ -801,7 +791,7 @@ class _DompetKampusGlobalBody extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Pembayaran akan diverifikasi dengan PIN dan kode 2FA di aplikasi Dompet Kampus Global',
+                    'Pembayaran akan diverifikasi dengan PIN dan kode 2FA di aplikasi Gocap',
                     style: TextStyle(
                       fontSize: 12,
                       color: _brandColor.withValues(alpha: 0.85),
@@ -835,8 +825,8 @@ class _DompetKampusGlobalBody extends StatelessWidget {
                 _StepItem(
                   number: '1',
                   text: payLaunched
-                      ? 'Aplikasi Dompet Kampus Global sudah dibuka'
-                      : 'Kamu akan diarahkan ke Dompet Kampus Global',
+                      ? 'Aplikasi Gocap sudah dibuka'
+                      : 'Kamu akan diarahkan ke Gocap',
                   done: payLaunched,
                 ),
                 const SizedBox(height: 14),
@@ -859,7 +849,7 @@ class _DompetKampusGlobalBody extends StatelessWidget {
 
           const SizedBox(height: 28),
 
-          // ── Tombol buka Dompet Kampus Global ─────────────────
+          // ── Tombol buka Gocap ─────────────────
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
@@ -874,8 +864,8 @@ class _DompetKampusGlobalBody extends StatelessWidget {
               icon: const Icon(Icons.open_in_new),
               label: Text(
                 payLaunched
-                    ? 'Buka Kembali Dompet Kampus Global'
-                    : 'Buka Dompet Kampus Global',
+                    ? 'Buka Kembali Gocap'
+                    : 'Buka Gocap',
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
@@ -894,7 +884,7 @@ class _DompetKampusGlobalBody extends StatelessWidget {
 
           if (payStatus == PaymentCheckStatus.idle && payLaunched)
             Text(
-              'Menunggu konfirmasi pembayaran dari Dompet Kampus Global...',
+              'Menunggu konfirmasi pembayaran dari Gocap...',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
