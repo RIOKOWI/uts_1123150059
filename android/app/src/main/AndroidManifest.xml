@@ -34,19 +34,10 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <!-- Scheme: gocap -->
                 <!-- Digunakan untuk menerima callback dari Dompet Kampus Global -->
-                <data android:scheme="dompetkampus" android:host="payment-callback"/>
+                <data android:scheme="warmindo" android:host="payment-callback"/>
             </intent-filter>
 
-            <!-- Intent filter untuk membuka Dompet Kampus Global -->
-            <!-- (Ini hanya deklarasi opsional, deep-link launch dilakukan via url_launcher) -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <!-- Scheme: dompetkampus -->
-                <!-- Digunakan untuk launch Dompet Kampus Global -->
-                <data android:scheme="dompetkampus" android:host="pay"/>
-            </intent-filter>
+            
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
@@ -68,7 +59,7 @@
         <intent>
             <action android:name="android.intent.action.VIEW"/>
             <category android:name="android.intent.category.BROWSABLE"/>
-            <data android:scheme="dompetkampus"/>
+            <data android:scheme="gocap"/>
         </intent>
     </queries>
 </manifest>
