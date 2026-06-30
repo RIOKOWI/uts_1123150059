@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uts_1123150059/features/order/data/models/order_model.dart';
 import 'package:uts_1123150059/features/order/presentation/providers/order_provider.dart';
+import 'package:uts_1123150059/core/shared/widgets/neumorphic_container.dart';
 
 class MyOrdersPage extends StatefulWidget {
   const MyOrdersPage({super.key});
@@ -174,18 +175,8 @@ class _OrderCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final statusColor = _statusColor(order.status);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return NeumorphicContainer(
+      borderRadius: 16,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
