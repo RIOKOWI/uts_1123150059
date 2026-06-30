@@ -6,6 +6,7 @@ import 'package:uts_1123150059/features/auth/presentation/providers/auth_provide
 import 'package:uts_1123150059/features/dashboard/data/models/product_model.dart';
 import 'package:uts_1123150059/features/dashboard/presentation/providers/product_provider.dart';
 import 'package:uts_1123150059/features/cart/presentation/providers/cart_provider.dart';
+import 'package:uts_1123150059/core/shared/widgets/neumorphic_container.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -150,15 +151,10 @@ class _DashboardPageState extends State<DashboardPage> {
               final p = product.products[i];
               return GestureDetector(
                 onTap: () => _showProductDetail(context, p),
-                child: Card(
-                  color: surface,
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
-                    child: Column(
+                child: NeumorphicContainer(
+                  borderRadius: 12,
+                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+                  child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ClipRRect(
@@ -245,7 +241,6 @@ class _DashboardPageState extends State<DashboardPage> {
                       ],
                     ),
                   ),
-                ),
               );
             },
           ),
