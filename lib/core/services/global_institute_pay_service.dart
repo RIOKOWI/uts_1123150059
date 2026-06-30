@@ -6,12 +6,12 @@ import 'package:flutter/foundation.dart';
 // ── Log helper ────────────────────────────────────────────────
 /// // Log helper untuk debugging deeplink
 void _log(String tag, String message) {
-  debugPrint('[Gocap/$tag] $message');
+  debugPrint('[Warmindo/$tag] $message');
 }
 
 // ── Model callback ────────────────────────────────────────────
 
-/// // Model data callback dari Dompet Kampus Global
+/// // Model data callback dari Gocap
 class PaymentCallbackData {
   /// // Status pembayaran: 'success', 'failed', 'pending', 'cancelled'
   final String status;
@@ -19,7 +19,7 @@ class PaymentCallbackData {
   /// // Reference ID untuk tracking transaksi
   final String? reference;
 
-  /// // Transaction ID dari Dompet Kampus Global
+  /// // Transaction ID dari Gocap
   final String? transactionId;
 
   const PaymentCallbackData({
@@ -38,10 +38,10 @@ class PaymentCallbackData {
 
 // ── Service ────────────────────────────────────────────────────
 
-/// // Service untuk menangani deeplink callback dari Dompet Kampus Global.
+/// // Service untuk menangani deeplink callback dari Gocap.
 /// //
-/// // Gunakan service ini di aplikasi Gocap untuk:
-/// // 1. Menerima callback setelah pembayaran selesai di Dompet Kampus Global
+/// // Gunakan service ini di aplikasi Warmindo untuk:
+/// // 1. Menerima callback setelah pembayaran selesai di Gocap
 /// // 2. Mendengarkan stream callback untuk update real-time
 /// // 3. Menangani cold-start scenario (app dibuka via deeplink langsung)
 /// //
@@ -146,7 +146,7 @@ class GlobalInstitutePayService {
   /// // Parameter URI:
   /// // - `status` (required): 'success', 'failed', 'pending', 'cancelled'
   /// // - `reference` (optional): Reference ID pesanan
-  /// // - `transaction_id` (optional): Transaction ID dari Dompet Kampus Global
+  /// // - `transaction_id` (optional): Transaction ID dari Gocap
   void _handleUri(Uri uri, {bool isColdStart = false}) {
     _log(
       _tag,
@@ -155,14 +155,14 @@ class GlobalInstitutePayService {
     );
 
     // Filter: hanya proses callback Gocap
-    if (uri.scheme != 'dompetkampus') {
-      _log(_tag, '⏩ Diabaikan — bukan skema gocap (scheme=${uri.scheme})');
+    if (uri.scheme != 'warmindo') {
+      _log(_tag, 'abaikan — bukan skema warmindo (scheme=${uri.scheme})');
       return;
     }
     if (uri.host != 'payment-callback') {
       _log(
         _tag,
-        '⏩ Diabaikan — bukan host payment-callback (host=${uri.host})',
+        'abaikan — bukan host payment-callback (host=${uri.host})',
       );
       return;
     }
@@ -186,49 +186,42 @@ class GlobalInstitutePayService {
 
   // ── Build URL keluar ─────────────────────────────────────────
 
-  /// // Membangun URL callback untuk Dompet Kampus Global.
-  /// //
-  /// // URL ini digunakan oleh Dompet Kampus Global untuk mengembalikan
-  /// // kontrol ke aplikasi Gocap setelah pembayaran selesai.
-  /// //
-  /// // Parameter:
-  /// // - `status`: Status pembayaran ('success', 'failed', 'pending', 'cancelled')
-  /// // - `reference`: Reference ID pesanan (misal: 'INV-123')
-  /// // - `transactionId`: Transaction ID dari Dompet Kampus Global
-  /// //
-  /// // Returns: URI string dengan format `gocap://payment-callback?...`
-  /// //
-  /// // Contoh:
-  /// // ```dart
-  /// // final callbackUrl = GlobalInstitutePayService.buildCallbackUrl(
-  /// //   status: 'success',
-  /// //   reference: 'INV-123',
-  /// //   transactionId: 'TRX-456',
-  /// // );
-  /// // // Returns: 'gocap://payment-callback?status=success&reference=INV-123&transaction_id=TRX-456'
-  /// // ```
-  static String buildCallbackUrl({
-    required String status,
-    String? reference,
-    String? transactionId,
+  /// Membangun URL deeplink ke Gocap sesuai spesifikasi.
+  static String buildDeeplinkUrl({
+    required int orderId,
+    required double amount,
+    String? description,
   }) {
-    const scheme = 'dompetkampus';
-    const host = 'payment-callback';
+    const scheme = 'gocap';
+    const host = 'pay';
+    final desc = (description != null && description.isNotEmpty)
+        ? description
+        : 'Order #$orderId';
+    const callbackUrl = 'warmindo://payment-callback';
 
-    final queryParams = <String, String>{
-      'status': status,
-    };
-    if (reference != null) queryParams['reference'] = reference;
-    if (transactionId != null) queryParams['transaction_id'] = transactionId;
+    _log(_tag, ' Membangun deeplink URL:');
+    _log(_tag, 'merchant_id : MCH_WARMINDO');
+    _log(_tag, 'merchant_name: Warmindo');
+    _log(_tag, 'amount : ${amount.toInt()}');
+    _log(_tag, 'description : $desc');
+    _log(_tag, 'reference : INV-$orderId');
+    _log(_tag, 'callback : $callbackUrl');
 
     final uri = Uri(
       scheme: scheme,
       host: host,
-      queryParameters: queryParams,
+      queryParameters: {
+        'merchant_id': 'MCH_WARMINDO',
+        'merchant_name': 'Warmindo',
+        'amount': amount.toInt().toString(),
+        'description': desc,
+        'reference': 'INV-$orderId',
+        'callback': callbackUrl,
+      },
     );
 
     final result = uri.toString();
-    _log(_tag, ' URL callback dibangun: $result');
+    _log(_tag, ' URL lengkap (sebelum launch): $result');
     return result;
   }
 }
