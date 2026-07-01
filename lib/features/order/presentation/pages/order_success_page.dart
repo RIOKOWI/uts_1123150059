@@ -27,6 +27,8 @@ class OrderSuccessPage extends StatelessWidget {
         return 'Transfer Bank';
       case 'virtual_account':
         return 'Virtual Account';
+      case 'gocap':
+        return 'Gocap';
       default:
         return method;
     }
@@ -133,7 +135,7 @@ class OrderSuccessPage extends StatelessWidget {
                       const Divider(height: 20),
                       _InfoRow(
                         label: 'Status',
-                        value: _statusLabel(order.status),
+                        value: 'Berhasil',
                         icon: Icons.info_outline,
                         iconColor: Colors.orange,
                       ),

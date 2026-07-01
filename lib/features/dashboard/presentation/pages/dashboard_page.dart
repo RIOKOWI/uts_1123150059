@@ -6,6 +6,7 @@ import 'package:uts_1123150059/features/auth/presentation/providers/auth_provide
 import 'package:uts_1123150059/features/dashboard/data/models/product_model.dart';
 import 'package:uts_1123150059/features/dashboard/presentation/providers/product_provider.dart';
 import 'package:uts_1123150059/features/cart/presentation/providers/cart_provider.dart';
+import 'package:uts_1123150059/core/shared/widgets/neumorphic_container.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -138,10 +139,10 @@ class _DashboardPageState extends State<DashboardPage> {
         ProductStatus.loaded => RefreshIndicator(
           onRefresh: () => product.fetchProducts(),
           child: GridView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 80), // bottom 80 for FAB
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              childAspectRatio: 0.75,
+              childAspectRatio: 0.68,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
             ),
@@ -150,108 +151,96 @@ class _DashboardPageState extends State<DashboardPage> {
               final p = product.products[i];
               return GestureDetector(
                 onTap: () => _showProductDetail(context, p),
-                child: Card(
-                  color: surface,
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                child: NeumorphicContainer(
+                  borderRadius: 12,
+                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(12),
-                        ),
-                        child: Image.network(
-                          p.imageUrl,
-                          height: 120,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            height: 120,
-                            color: Colors.grey.shade200,
-                            child: const Icon(
-                              Icons.image_not_supported,
-                              size: 40,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(12),
+                          ),
+                          child: Image.network(
+                            p.imageUrl,
+                            height: 100,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              height: 100,
+                              color: Colors.grey.shade200,
+                              child: const Icon(
+                                Icons.image_not_supported,
+                                size: 40,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                p.name,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  color: onSurface,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                _formatPrice(p.price),
-                                style: TextStyle(
-                                  color: primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: onSurface.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  p.category,
-                                  style: TextStyle(fontSize: 11, color: onSurface),
-                                ),
-                              ),
-                              const Spacer(),
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: () async {
-                                    final success = await cartProv.addToCart(p.id, 1);
-                                    if (!mounted) return;
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          success
-                                              ? '${p.name} ditambahkan ke keranjang'
-                                              : 'Gagal menambahkan ke keranjang',
-                                        ),
-                                        duration: const Duration(seconds: 2),
-                                        backgroundColor: success ? Colors.green : Colors.red,
-                                      ),
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                  ),
-                                  child: const Text(
-                                    '+ Keranjang',
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                              ),
-                            ],
+                        const SizedBox(height: 6),
+                        Text(
+                          p.name,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: onSurface,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _formatPrice(p.price),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: primary,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: onSurface.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            p.category,
+                            style: TextStyle(fontSize: 9, color: onSurface),
+                          ),
+                        ),
+                        const Spacer(),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 32,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              final success = await cartProv.addToCart(p.id, 1);
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    success
+                                        ? '${p.name} ditambahkan ke keranjang'
+                                        : 'Gagal menambahkan ke keranjang',
+                                  ),
+                                  duration: const Duration(seconds: 2),
+                                  backgroundColor: success ? Colors.green : Colors.red,
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              textStyle: const TextStyle(fontSize: 11),
+                            ),
+                            child: const Text('+ Keranjang'),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
               );
             },
           ),
