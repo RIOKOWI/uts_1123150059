@@ -395,7 +395,7 @@ class _PaymentPendingPageState extends State<PaymentPendingPage>
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Aplikasi GoPay tidak ditemukan di perangkat ini'),
+            content: Text('Aplikasi Gocap tidak ditemukan di perangkat ini'),
             backgroundColor: Colors.red,
           ),
         );
@@ -956,7 +956,7 @@ class _GopayBody extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Bayar dengan GoPay',
+            'Bayar dengan Gocap',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: onSurface,
@@ -992,14 +992,14 @@ class _GopayBody extends StatelessWidget {
                 _StepItem(
                   number: '1',
                   text: gopayLaunched
-                      ? 'Aplikasi GoPay sudah dibuka'
-                      : 'Kamu akan diarahkan ke aplikasi GoPay',
+                      ? 'Aplikasi Gocap sudah dibuka'
+                      : 'Kamu akan diarahkan ke aplikasi Gocap',
                   done: gopayLaunched,
                 ),
                 const SizedBox(height: 14),
                 _StepItem(
                   number: '2',
-                  text: 'Konfirmasi pembayaran ${formatPrice(order.totalAmount)} di GoPay',
+                  text: 'Konfirmasi pembayaran ${formatPrice(order.totalAmount)} di Gocap',
                   done: false,
                 ),
                 const SizedBox(height: 14),
@@ -1025,7 +1025,7 @@ class _GopayBody extends StatelessWidget {
               ),
               icon: const Icon(Icons.open_in_new),
               label: Text(
-                gopayLaunched ? 'Buka Kembali GoPay' : 'Buka GoPay',
+                gopayLaunched ? 'Buka Kembali Gocap' : 'Buka Gocap',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -1042,7 +1042,7 @@ class _GopayBody extends StatelessWidget {
           const SizedBox(height: 16),
           if (payStatus == PaymentCheckStatus.idle && gopayLaunched)
             Text(
-              'Sedang menunggu konfirmasi pembayaran dari GoPay...',
+              'Sedang menunggu konfirmasi pembayaran dari Gocap...',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,

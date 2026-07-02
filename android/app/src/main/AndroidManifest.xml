@@ -24,17 +24,13 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-
-            <!-- ── Deep-link support ─────────────────────────────── -->
-            <!-- Intent filter untuk menerima deep-link dari Dompet Kampus Global -->
-            <!-- Format URI: gocap://payment-callback?status=...&reference=...&transaction_id=... -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <!-- Scheme: gocap -->
-                <!-- Digunakan untuk menerima callback dari Dompet Kampus Global -->
+
                 <data android:scheme="warmindo" android:host="payment-callback"/>
+                <!-- warmindo://payment-callback -->
             </intent-filter>
 
             
@@ -55,7 +51,6 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
-        <!-- Query untuk cek apakah Dompet Kampus Global terinstal -->
         <intent>
             <action android:name="android.intent.action.VIEW"/>
             <category android:name="android.intent.category.BROWSABLE"/>
